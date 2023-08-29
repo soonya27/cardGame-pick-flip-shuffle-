@@ -82,13 +82,13 @@ class TaroCard {
     }
 
     positionCards() {
+        //카드 펼치기
         const topTimeForAnimation = 700;
         this.topCardList.forEach((item, idx) => {
-            let leftPx = (100 / this.topCardList.length - 1);
             const delay = topTimeForAnimation / this.topCardList.length * idx;
 
             item.dom.animate([
-                { left: Math.ceil(leftPx * idx + 1) + '%' }],
+                { left: this.#calculateLeftPosition(this.topCardList, idx) }],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
             //class추가
             item.dom.parentNode.classList.add('clickable');
@@ -96,14 +96,13 @@ class TaroCard {
 
         this.bottomCardList.forEach((item, idx) => {
             //top
-            const topVw = this.#calulateVw(this.cardHeight + this.CARD_ROW_GAP);
+            const topVw = this.#calculateVw(this.cardHeight + this.CARD_ROW_GAP);
             item.dom.style.top = topVw + 'vw';
 
             //left
-            let leftPx = (100 / this.bottomCardList.length - 1);
             const delay = topTimeForAnimation + (topTimeForAnimation / this.bottomCardList.length * idx);
 
-            this.animation = item.dom.animate([{ left: Math.ceil(leftPx * idx + 1) + '%' },],
+            this.animation = item.dom.animate([{ left: this.#calculateLeftPosition(this.bottomCardList, idx) },],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
 
             //class추가
@@ -115,8 +114,8 @@ class TaroCard {
     animateSuffle() {
 
 
-        const top = this.#calulateVw(this.cardHeight + this.CARD_ROW_GAP) / 2;
-        const topTimeForAnimation = 1500;
+        const top = this.#calculateVw(this.cardHeight + this.CARD_ROW_GAP) / 2;
+        const topTimeForAnimation = 1300;
 
         this.topCardList.forEach((item, idx) => {
             //가운데 위치
@@ -158,8 +157,6 @@ class TaroCard {
 
 
 
-
-
         //카드 펼치기
         if (this.animation.playState != 'finished') {
             //애니메이션 중일때만.. 체크됨 
@@ -177,17 +174,19 @@ class TaroCard {
                 let topDelay = 0;
                 this.topCardList.forEach((item, idx) => {
 
-                    let leftPx = (100 / this.topCardList.length - 1);
+                    let leftPosition = this.#calculateLeftPosition(this.topCardList, idx);
                     if (idx == 0) {
-                        leftPx = 0;
+                        leftPosition = 0;
                     }
                     const delay = topTimeForAnimation / this.topCardList.length * idx;
+                    rightPosition = leftPosition;
+                    topDelay = topTimeForAnimation / this.topCardList.length * (idx - 2);
+
                     item.dom.animate([
-                        { left: Math.ceil(leftPx * idx + 1) + '%' }],
+                        { left: leftPosition }],
                         { duration: topTimeForAnimation, fill: "forwards", delay });
 
-                    rightPosition = Math.ceil(leftPx * idx + 1) + '%'
-                    topDelay = delay;
+
 
                     //class추가
                     item.dom.parentNode.classList.add('clickable');
@@ -197,23 +196,22 @@ class TaroCard {
 
                 this.bottomCardList.forEach((item, idx) => {
                     //top
-                    const topVw = this.#calulateVw(this.cardHeight + this.CARD_ROW_GAP) + 'vw';
+                    const topVw = this.#calculateVw(this.cardHeight + this.CARD_ROW_GAP) + 'vw';
 
-                    //left
-                    let leftPx = (100 / this.bottomCardList.length - 1);
-                    const delay = topTimeForAnimation + (topTimeForAnimation / this.bottomCardList.length * idx);
 
+
+                    //윗줄과 함께 이동
                     item.dom.animate([
                         { left: 0, top: 0 }, { left: rightPosition, top: 0 },],
-                        { duration: topDelay, fill: "forwards", delay: topDelay });
-
+                        { duration: topTimeForAnimation, fill: "forwards", delay: topDelay });
+                    //아래줄로 이동
                     item.dom.animate([
                         { left: rightPosition, top: 0 }, { left: 0, top: topVw },],
                         { duration: 400, fill: "forwards", delay: topDelay + topTimeForAnimation });
+                    //펼쳐지기
+                    item.dom.animate([{ top: topVw, left: this.#calculateLeftPosition(this.bottomCardList, idx) },],
+                        { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + 400 });
 
-
-                    item.dom.animate([{ top: topVw, left: Math.ceil(leftPx * idx + 1) + '%' },],
-                        { duration: topTimeForAnimation, fill: "forwards", delay: delay + topDelay + 400 });
 
                     // class추가
                     item.dom.parentNode.classList.add('clickable');
@@ -254,9 +252,16 @@ class TaroCard {
 
 
 
-    #calulateVw(px) {
+    #calculateVw(px) {
         return ((px) / window.innerWidth * 100);
     }
+
+
+    #calculateLeftPosition(cardList, idx) {
+        let leftPx = (100 / cardList.length - 1);
+        return Math.ceil(leftPx * idx + 1) + '%';
+    }
+
 
     //animation
     //1. reset -> line
