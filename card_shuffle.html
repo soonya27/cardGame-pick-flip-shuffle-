@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 섞기</title>
+    <link rel="stylesheet" href="css/resset.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+</head>
+<style>
+    #canvasContainer {
+        width: 100%;
+        height: 800px;
+        background-color: #540e80;
+        border: 10px solid #3f0960;
+        box-sizing: border-box;
+    }
+
+    .card-wrap {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .card-wrap ul {
+        position: relative;
+        display: flex;
+    }
+
+    .card-wrap ul li {
+        position: absolute;
+        left: -100%;
+        width: 13vw;
+        max-width: 120px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .card-wrap ul.clickable li:hover {
+        transform: translateY(-7%) !important;
+    }
+
+    .card-wrap ul li img {
+        width: 100%;
+    }
+
+    button {
+        padding: 10px;
+        border: 1px solid #000;
+    }
+</style>
+
+<body>
+    <div id="canvasContainer">
+        <div class="card-wrap">
+            <div class="card-select-wrap">
+            </div>
+            <div class="seleted-wrap">
+            </div>
+        </div>
+    </div>
+    <button onclick="reset()">카드 초기화</button>
+    <button onclick="shuffleCards()">카드 섞기</button>
+    <button onclick="sufflelikeline()">카드라인섞기</button>
+    <!-- <button onclick="sufflelikeline2()">카드라인(호선)</button> -->
+    <!-- <button onclick="sufflelikecircle()">카드원형섞기</button> -->
+    <script src="card_suffle.js"></script>
+    <audio id="collisionSound" src="crash.mp3" preload="auto"></audio>
+
+
+    <script>
+        const taroCard = new TaroCard();
+        const cardDataList = [{ id: 1, imgUrl: '/cover.png', title: 'taro01' },
+        { id: 2, imgUrl: '/cover.png', title: 'taro02' },
+        { id: 3, imgUrl: '/cover.png', title: 'taro03' },
+        { id: 4, imgUrl: '/cover.png', title: 'taro04' },
+        { id: 5, imgUrl: '/cover.png', title: 'taro05' },
+        { id: 6, imgUrl: '/cover.png', title: 'taro06' },
+        { id: 7, imgUrl: '/cover.png', title: 'taro07' },
+        { id: 8, imgUrl: '/cover.png', title: 'taro08' },
+        { id: 9, imgUrl: '/cover.png', title: 'taro09' },
+        { id: 10, imgUrl: '/cover.png', title: 'taro10' },
+        { id: 11, imgUrl: '/cover.png', title: 'taro11' },
+        { id: 12, imgUrl: '/cover.png', title: 'taro12' },
+        { id: 13, imgUrl: '/cover.png', title: 'taro13' },
+        { id: 14, imgUrl: '/cover.png', title: 'taro14' },
+        { id: 15, imgUrl: '/cover.png', title: 'taro15' },
+        { id: 16, imgUrl: '/cover.png', title: 'taro16' },
+        { id: 17, imgUrl: '/cover.png', title: 'taro17' },
+        { id: 18, imgUrl: '/cover.png', title: 'taro18' },
+        { id: 19, imgUrl: '/cover.png', title: 'taro19' },
+        { id: 20, imgUrl: '/cover.png', title: 'taro20' },
+        { id: 21, imgUrl: '/cover.png', title: 'taro21' },
+        { id: 22, imgUrl: '/cover.png', title: 'taro22' },
+        { id: 23, imgUrl: '/cover.png', title: 'taro23' },
+        { id: 24, imgUrl: '/cover.png', title: 'taro24' },
+        ];
+        taroCard.init(cardDataList);
+
+
+        function reset() {
+            taroCard.reset();
+        }
+        function shuffleCards() {
+            taroCard.shuffle();
+        }
+
+    </script>
+</body>
+
+
+</html>
