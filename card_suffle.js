@@ -8,6 +8,7 @@
 
 
 class TaroCard {
+    #cardHeight;
     constructor() {
         this.cardField = document.querySelector('.card-select-wrap');
         this.cardList = [];
@@ -19,30 +20,30 @@ class TaroCard {
         this.cardCount = cardObj.length;
         cardObj.map(item => this.cardList.push({ data: item }));
 
-        this.randomCard();
-        this.renderCard();
+        this.randomList();
+        this.render();
 
         var img = new Image();
         img.onload = () => {
-            this.cardHeight = document.querySelector('.card-select-wrap li').offsetHeight;
-            this.positionCards();
+            this.#cardHeight = document.querySelector('.card-select-wrap li').offsetHeight;
+            this.spread();
         };
         img.src = '/cover.png';
     }
 
     reset() {
-        this.randomCard();
-        this.renderCard();
+        this.randomList();
+        this.render();
 
         const resetPosition = '-100%'
         //위치 reset
         this.cardList.forEach(item => {
             item.dom.style.left = resetPosition;
         });
-        this.positionCards();
+        this.spread();
     }
 
-    renderCard() {
+    render() {
         this.cardField.innerHTML = '';
         const cardUl = document.createElement('ul');
         this.cardField.appendChild(cardUl);
@@ -62,7 +63,7 @@ class TaroCard {
         });
     }
 
-    updateCardList() {
+    updateList() {
         this.cardField.querySelectorAll('li').forEach((item, idx) => {
             item.setAttribute('data-id', '');
             item.setAttribute('data-id', this.cardList[idx].data.id);
@@ -75,13 +76,13 @@ class TaroCard {
         });
     }
 
-    randomCard() {
+    randomList() {
         this.cardList.sort(() => Math.random() - 0.5);
         this.topCardList = Array.from(this.cardList).slice(0, this.MAXCARDS_NUM);
         this.bottomCardList = Array.from(this.cardList).slice(this.MAXCARDS_NUM);
     }
 
-    positionCards() {
+    spread() {
         //카드 펼치기
         const topTimeForAnimation = 700;
         this.topCardList.forEach((item, idx) => {
@@ -96,7 +97,7 @@ class TaroCard {
 
         this.bottomCardList.forEach((item, idx) => {
             //top
-            const topVw = this.#calculateVw(this.cardHeight + this.CARD_ROW_GAP);
+            const topVw = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP);
             item.dom.style.top = topVw + 'vw';
 
             //left
@@ -112,9 +113,7 @@ class TaroCard {
 
 
     animateSuffle() {
-
-
-        const top = this.#calculateVw(this.cardHeight + this.CARD_ROW_GAP) / 2;
+        const top = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) / 2;
         const topTimeForAnimation = 1300;
 
         this.topCardList.forEach((item, idx) => {
@@ -162,7 +161,7 @@ class TaroCard {
             //애니메이션 중일때만.. 체크됨 
             this.animation.onfinish = () => {
                 console.log(' suffle 애니메이션 끝')
-                // this.positionCards();
+                // this.spread();
 
                 //위치 변경(0)
                 this.cardList.forEach((item, idx) => {
@@ -196,7 +195,7 @@ class TaroCard {
 
                 this.bottomCardList.forEach((item, idx) => {
                     //top
-                    const topVw = this.#calculateVw(this.cardHeight + this.CARD_ROW_GAP) + 'vw';
+                    const topVw = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) + 'vw';
 
 
 
@@ -219,7 +218,7 @@ class TaroCard {
 
             }
         } else {
-            // this.positionCards();
+            // this.spread();
         }
 
     }
@@ -233,13 +232,13 @@ class TaroCard {
             //애니메이션 중일때만.. 체크됨 
             this.animation.onfinish = () => {
                 console.log('position 애니메이션 끝')
-                this.randomCard();
-                this.updateCardList();
+                this.randomList();
+                this.updateList();
                 this.animateSuffle();
             }
         } else {
-            this.randomCard();
-            this.updateCardList();
+            this.randomList();
+            this.updateList();
             this.animateSuffle();
         }
 
