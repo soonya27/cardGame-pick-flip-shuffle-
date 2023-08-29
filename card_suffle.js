@@ -63,6 +63,9 @@ class TaroCard {
         });
     }
 
+    /**
+     * 현재생성돼있는 dom 요소의 데이터를 this.cardList에 업데이트
+     */
     updateList() {
         this.cardField.querySelectorAll('li').forEach((item, idx) => {
             item.setAttribute('data-id', '');
@@ -111,6 +114,34 @@ class TaroCard {
         });
     }
 
+    /**
+     * 카드를 섞음 -> rerender하지 않고 cardList를 update 함 
+     */
+    shuffle() {
+        //class삭제
+        this.cardField.querySelector('ul').classList.remove('clickable');
+
+        //animation
+        if (this.animation.playState != 'finished') {
+            //애니메이션 중일때만.. 체크됨 
+            this.animation.onfinish = () => {
+                console.log('position 애니메이션 끝')
+                this.randomList();
+                this.updateList();
+                this.animateSuffle();
+            }
+        } else {
+            this.randomList();
+            this.updateList();
+            this.animateSuffle();
+        }
+
+
+        //완료후
+        //class추가
+        // this.cardField.querySelector('ul').classList.remove('clickable');
+
+    }
 
     animateSuffle() {
         const top = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) / 2;
@@ -220,32 +251,6 @@ class TaroCard {
         } else {
             // this.spread();
         }
-
-    }
-
-    shuffle() {
-        //class삭제
-        this.cardField.querySelector('ul').classList.remove('clickable');
-
-        //animation
-        if (this.animation.playState != 'finished') {
-            //애니메이션 중일때만.. 체크됨 
-            this.animation.onfinish = () => {
-                console.log('position 애니메이션 끝')
-                this.randomList();
-                this.updateList();
-                this.animateSuffle();
-            }
-        } else {
-            this.randomList();
-            this.updateList();
-            this.animateSuffle();
-        }
-
-
-        //완료후
-        //class추가
-        // this.cardField.querySelector('ul').classList.remove('clickable');
 
     }
 
