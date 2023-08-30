@@ -128,16 +128,12 @@ class TaroCard {
 
         this.#stopAnimation('spread', 'shuffle');
 
-        console.log(this.animation)
         if (this.animation.spread.playState != 'finished') {
             this.animation.spread.onfinish = () => {
-                this.randomList();
-                this.updateList();
                 this.animateshuffle();
             }
+
         } else {
-            this.randomList();
-            this.updateList();
             this.animateshuffle();
         }
 
@@ -149,6 +145,14 @@ class TaroCard {
     }
 
     animateshuffle() {
+        this.randomList();
+        this.updateList();
+        //shffle -> 애니메이션 멈춤..
+        this.#stopAnimation();
+
+
+
+
         const top = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) / 2;
         const topTimeForAnimation = 1300;
 
@@ -276,7 +280,7 @@ class TaroCard {
             }
             if (this.animation[key].playState == 'running') {
                 this.animation[key].pause();
-                console.log('애니메이션 멈춤')
+                // console.log('애니메이션 멈춤')
             }
         }
     }
