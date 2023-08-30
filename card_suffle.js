@@ -14,6 +14,7 @@ class TaroCard {
         this.cardList = [];
         this.MAXCARDS_NUM = 12;
         this.CARD_ROW_GAP = 20;
+        this.animation = {};
     }
 
     init(cardObj) {
@@ -86,6 +87,10 @@ class TaroCard {
     }
 
     spread() {
+
+
+        this.#stopAnimation();
+
         //카드 펼치기
         const topTimeForAnimation = 700;
         this.topCardList.forEach((item, idx) => {
@@ -106,7 +111,7 @@ class TaroCard {
             //left
             const delay = topTimeForAnimation + (topTimeForAnimation / this.bottomCardList.length * idx);
 
-            this.animation = item.dom.animate([{ left: this.#calculateLeftPosition(this.bottomCardList, idx) },],
+            this.animation.spread = item.dom.animate([{ left: this.#calculateLeftPosition(this.bottomCardList, idx) },],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
 
             //class추가
@@ -121,19 +126,19 @@ class TaroCard {
         //class삭제
         this.cardField.querySelector('ul').classList.remove('clickable');
 
-        //animation
-        if (this.animation.playState != 'finished') {
-            //애니메이션 중일때만.. 체크됨 
-            this.animation.onfinish = () => {
-                console.log('position 애니메이션 끝')
+        this.#stopAnimation('spread', 'shuffle');
+
+        console.log(this.animation)
+        if (this.animation.spread.playState != 'finished') {
+            this.animation.spread.onfinish = () => {
                 this.randomList();
                 this.updateList();
-                this.animateSuffle();
+                this.animateshuffle();
             }
         } else {
             this.randomList();
             this.updateList();
-            this.animateSuffle();
+            this.animateshuffle();
         }
 
 
@@ -143,7 +148,7 @@ class TaroCard {
 
     }
 
-    animateSuffle() {
+    animateshuffle() {
         const top = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) / 2;
         const topTimeForAnimation = 1300;
 
@@ -160,7 +165,7 @@ class TaroCard {
                 { left: '35%' },
                 { left: '50%', zIndex: this.topCardList.length + idx }
             ],
-                { duration: topTimeForAnimation, delay: delay });
+                { duration: topTimeForAnimation, delay: delay, fill: "forwards" });
         });
 
         this.bottomCardList.forEach((item, idx) => {
@@ -171,32 +176,28 @@ class TaroCard {
             //섞는 motion
             const delay = topTimeForAnimation / this.bottomCardList.length * idx;
 
-            if (idx != 0) {
-                this.animation = item.dom.animate([
-                    { left: '50%' },
-                    { left: '65%' },
-                    { left: '50%', zIndex: this.bottomCardList.length + idx }
-                ],
-                    { duration: topTimeForAnimation, delay: delay });
-
-            } else {
-                item.dom.style.zIndex = idx;
-            }
+            this.animation.shuffle = item.dom.animate([
+                { left: '50%' },
+                { left: '65%' },
+                { left: '50%', zIndex: this.bottomCardList.length + idx }
+            ],
+                { duration: topTimeForAnimation, delay: delay, fill: "forwards" });
         });
 
 
 
-
         //카드 펼치기
-        if (this.animation.playState != 'finished') {
+        if (this.animation.shuffle.playState != 'finished') {
             //애니메이션 중일때만.. 체크됨 
-            this.animation.onfinish = () => {
-                console.log(' suffle 애니메이션 끝')
-                // this.spread();
+            this.animation.shuffle.onfinish = () => {
+                console.log(' shuffle 애니메이션 끝');
+
 
                 //위치 변경(0)
                 this.cardList.forEach((item, idx) => {
-                    item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }], { duration: 300, fill: 'forwards' })
+                    item.dom.style.zIndex = 0;
+                    item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }],
+                        { duration: 300, fill: 'forwards' })
                 });
 
                 const topTimeForAnimation = 500;
@@ -267,10 +268,24 @@ class TaroCard {
     }
 
 
+    #stopAnimation(...except) {
+        for (let key in this.animation) {
+
+            if (except.some(item => item == key)) {
+                continue;
+            }
+            if (this.animation[key].playState == 'running') {
+                this.animation[key].pause();
+                console.log('애니메이션 멈춤')
+            }
+        }
+    }
+
+
     //animation
     //1. reset -> line
-    //2. suffle
-    //3. suffle -> line
+    //2. shuffle
+    //3. shuffle -> line
 
 
 
