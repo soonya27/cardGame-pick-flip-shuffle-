@@ -18,6 +18,16 @@ class TaroCard {
         this.CARD_ROW_GAP = 20;
         this.animation = {};
         this.selectedAreaPosition = {}
+        window.addEventListener('resize', () => {
+            this.reset();
+            // setTimeout(() => {
+            //     this.#cardHeight = document.querySelector('.card-select-wrap li img').offsetHeight;
+            //     // con(this.#cardHeight)
+            //     this.cardField.querySelectorAll('li').forEach((item, idx) => {
+            //         item.style.height = this.#cardHeight + 'px';
+            //     });
+            // }, 200)
+        })
     }
 
     init(cardObj) {
@@ -26,26 +36,6 @@ class TaroCard {
 
         this.randomList();
         this.render();
-
-        var img = new Image();
-        img.onload = () => {
-            this.#cardHeight = document.querySelector('.card-select-wrap li').offsetHeight;
-
-            //카드펼쳐지는 영역 position top
-            this.selectedAreaPosition.top = this.#cardHeight * 2 + this.CARD_ROW_GAP;
-            this.selectedAreaPosition.innerHeight = this.field.clientHeight -
-                (parseInt(window.getComputedStyle(this.field).paddingTop) +
-                    parseInt(window.getComputedStyle(this.field).paddingBottom));
-            this.selectedAreaPosition.bottom = this.selectedAreaPosition.innerHeight -
-                this.#cardHeight;
-
-            this.selectedAreaPosition.verticleCenter = this.selectedAreaPosition.top +
-                ((this.selectedAreaPosition.innerHeight -
-                    this.selectedAreaPosition.top) / 2)
-
-            this.spread();
-        };
-        img.src = '/cover.png';
 
     }
 
@@ -58,7 +48,6 @@ class TaroCard {
         this.cardList.forEach(item => {
             item.dom.style.left = resetPosition;
         });
-        this.spread();
     }
 
     render() {
@@ -76,7 +65,7 @@ class TaroCard {
 
             //----------------------   임시 ------------------------------------
             // cardLi.innerHTML = `<img src="${item.data.imgUrl}" alt="">`;
-            cardLi.innerHTML = `<img src="/cover.png" alt="">`;
+            cardLi.innerHTML = `<img class="front" src="/cover.png" alt="">`;
 
             cardUl.appendChild(cardLi);
 
@@ -102,6 +91,32 @@ class TaroCard {
                 // }
             });
         });
+
+
+        var img = new Image();
+        img.onload = () => {
+            //img높이값
+            this.#cardHeight = document.querySelector('.card-select-wrap li img').offsetHeight;
+            //li높이값 수동으로지정 -> 안의 img가 position:absolute이기때문에
+            this.cardField.querySelectorAll('li').forEach((item, idx) => {
+                item.style.height = this.#cardHeight + 'px';
+            });
+
+            //카드펼쳐지는 영역 position top
+            this.selectedAreaPosition.top = this.#cardHeight * 2 + this.CARD_ROW_GAP;
+            this.selectedAreaPosition.innerHeight = this.field.clientHeight -
+                (parseInt(window.getComputedStyle(this.field).paddingTop) +
+                    parseInt(window.getComputedStyle(this.field).paddingBottom));
+            this.selectedAreaPosition.bottom = this.selectedAreaPosition.innerHeight -
+                this.#cardHeight;
+
+            this.selectedAreaPosition.verticleCenter = this.selectedAreaPosition.top +
+                ((this.selectedAreaPosition.innerHeight -
+                    this.selectedAreaPosition.top) / 2)
+
+            this.spread();
+        };
+        img.src = '/cover.png';
 
 
 
