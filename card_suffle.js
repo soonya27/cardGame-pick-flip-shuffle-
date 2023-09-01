@@ -344,6 +344,7 @@ class TaroCard {
         const target = e.target.parentNode;
         target.classList.replace('unClick', 'clicked');
 
+
         //뽑히는 motion
         target.animate([
             { transform: 'translateY(-35%)' },
@@ -355,53 +356,49 @@ class TaroCard {
             { duration: 600, delay: 300, fill: "backwards" });
 
 
-        //정중앙에 flip  
+        //정중앙에서 flip  
         this.animation.center = target.animate([
             { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
             { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 0 },
-            { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 1 },
+            { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 1, zIndex: 9999 },
         ],
             { duration: 1200, delay: 900, fill: "forwards" });
 
-        //back 요소 추가
+        //back 뒷면카드 요소 추가
         this.animation.center.onfinish = () => {
             const back = document.createElement('img');
             const imgUrl = this.cardList.find(item => item.data.id == target.getAttribute('data-id')).data.imgUrl;
+            back.classList.add('back');
             back.setAttribute('src', imgUrl);
-            // back.style.position = 'absolute';
-            // back.style.left = '0'
+
+
             back.style.transform = 'rotateY(180deg)';
-            target.querySelector('img').style.position = 'absolute';
-            // target.querySelector('img').style.transform = 'rotateY( 180deg )';
-            target.querySelector('img').style.zIndex = 2;
             target.appendChild(back);
 
-            // target.querySelector('img').animate([
-            //     { position: 'absolute', transform: 'rotateY(180deg)' },
-            // ],
-            //     { duration: 0, fill: "backwards" });
-            // target.querySelector('img').animate([
-            //     { transform: 'rotateY(180deg)' },
-            // ],
-            //     { duration: 600, fill: "forwards" });
-            // target.animate({
-            //     transform: 'translate(-50%,-50%) scale(2) rotateY( 180deg )'
-            // },
-            //     { duration: 600, fill: "forwards" });
+            target.querySelector('img.front').animate({
+                transform: 'rotateY( 180deg )',
+            },
+                { duration: 600, fill: "forwards" });
 
+            back.animate({
+                transform: 'rotateY( 0deg )',
+            },
+                { duration: 600, fill: "forwards" });
+
+            //하단영역 중앙정렬
+            target.animate([
+                { opacity: 0, top: this.selectedAreaPosition.top + 'px' },
+                {
+                    top: this.selectedAreaPosition.verticleCenter + 'px',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 1
+                },
+            ],
+                { duration: 600, delay: 1200, fill: "forwards" });
         }
 
 
 
-        //하단영역 중앙정렬
-        // target.animate([
-        //     { opacity: 0, top: this.selectedAreaPosition.top + 'px' },
-        //     {
-        //         top: this.selectedAreaPosition.verticleCenter + 'px',
-        //         transform: 'translateY(-50%)'
-        //     },
-        // ],
-        //     { duration: 600, delay: 2100, fill: "forwards" });
 
 
 
