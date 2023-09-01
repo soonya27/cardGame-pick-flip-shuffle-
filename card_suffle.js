@@ -3,10 +3,10 @@
 // 카드 원형? 정렬
 // 카드 호선 정렬
 
-//플립 모션 -> 수정구슬...? 화면에 보여지고 아래로 펼쳐지는..?
-
 
 let con = console.log;
+const coverIgmUrl = '/cover.png';
+
 
 class TaroCard {
     #cardHeight;
@@ -20,59 +20,78 @@ class TaroCard {
         this.selectedAreaPosition = {}
         window.addEventListener('resize', () => {
             this.reset();
-            // setTimeout(() => {
-            //     this.#cardHeight = document.querySelector('.card-select-wrap li img').offsetHeight;
-            //     // con(this.#cardHeight)
-            //     this.cardField.querySelectorAll('li').forEach((item, idx) => {
-            //         item.style.height = this.#cardHeight + 'px';
-            //     });
-            // }, 200)
-        })
+        });
     }
 
     init(cardObj) {
         this.cardCount = cardObj.length;
         cardObj.map(item => this.cardList.push({ data: item }));
 
-        this.randomList();
-        this.render();
-
+        this.#randomList();
+        this.#render();
     }
 
+    /**
+     * 카드 초기화 : 기본 라인정렬(spread)
+     */
     reset() {
-        this.randomList();
-        this.render();
+        this.#randomList();
+        this.#render();
 
-        const resetPosition = '-100%'
+        const resetPosition = '-100%';
         //위치 reset
         this.cardList.forEach(item => {
             item.dom.style.left = resetPosition;
         });
     }
 
-    render() {
+    /**
+   * 카드를 섞음 -> rerender하지 않고 cardList를 update 함 
+   */
+    shuffle() {
+        //class삭제
+        this.cardField.querySelector('ul').classList.remove('clickable');
+
+        //shuffle, spread, click중일수있음
+        //click중이거나 클릭된게 있을때
+        if (this.animation?.click?.playState == 'running' ||
+            this.cardField.querySelectorAll('li.clicked').length != 0) {
+            this.#stopAnimation();
+            this.#resetCardState();
+            if (this.animation.flipBack && this.animation.flipBack.playState == 'running') {
+                this.animation.flipBack.onfinish = () => {
+                    this.cardField.querySelectorAll('li img.back').forEach(item => {
+                        item.remove();
+                    });
+                    this.playShuffleAnimation();
+                }
+            } else {
+                //플립백은 있지만 끝났을때
+                this.playShuffleAnimation();
+            }
+        } else {
+            this.#resetCardState();
+            this.playShuffleAnimation();
+        }
+    }
+
+    #render() {
         this.cardField.innerHTML = '';
         const cardUl = document.createElement('ul');
         this.cardField.appendChild(cardUl);
         this.cardList.forEach((item, idx) => {
             const cardLi = document.createElement('li');
             cardLi.classList.add('unClick');
-
             cardLi.setAttribute('data-id', '');
             cardLi.setAttribute('data-id', item.data.id);
-
-            this.cardList[idx].dom = cardLi;
-
-            //----------------------   임시 ------------------------------------
-            // cardLi.innerHTML = `<img src="${item.data.imgUrl}" alt="">`;
-            cardLi.innerHTML = `<img class="front" src="/cover.png" alt="">`;
-
+            cardLi.innerHTML = `<img class="front" src="${coverIgmUrl}" alt="">`;
             cardUl.appendChild(cardLi);
 
+            //cardList dom요소 추가
+            this.cardList[idx].dom = cardLi;
 
-            //clickEvent 추가
+            //clickEvent 새로 render될때만 최초 1번
             cardLi.addEventListener('click', (e) => {
-                // con(e.target.closest('li').classList)
                 if (!e.target.closest('ul').classList.contains('clickable')) {
                     return;
                 }
@@ -80,26 +99,14 @@ class TaroCard {
                     return;
                 }
                 e.target.parentNode.classList.replace('unClick', 'clicked');
-                if (this.animation.click && this.animation.click.playState == 'running') {
-                    return;
-                }
                 this.#clickAnimation(e);
-
-
-                //animation끝난후 clickable class추가로 수정 -> 아래코드 주석
-                // if (this.#checkRunningAnimation().length == 0) {
-                //     this.#clickAnimation(e);
-                //     return;
-                // }
-                // this.#checkRunningAnimation().onfinish = () => {
-                //     this.#clickAnimation(e);
-                // }
             });
         });
 
 
-        var img = new Image();
-        img.onload = () => {
+        const coverImg = new Image();
+        coverImg.src = coverIgmUrl;
+        coverImg.onload = () => {
             //img높이값
             this.#cardHeight = document.querySelector('.card-select-wrap li img').offsetHeight;
             //li높이값 수동으로지정 -> 안의 img가 position:absolute이기때문에
@@ -107,49 +114,42 @@ class TaroCard {
                 item.style.height = this.#cardHeight + 'px';
             });
 
-            //카드펼쳐지는 영역 position top
+            //카드펼쳐지는 영역 position
             this.selectedAreaPosition.top = this.#cardHeight * 2 + this.CARD_ROW_GAP;
             this.selectedAreaPosition.innerHeight = this.field.clientHeight -
                 (parseInt(window.getComputedStyle(this.field).paddingTop) +
                     parseInt(window.getComputedStyle(this.field).paddingBottom));
             this.selectedAreaPosition.bottom = this.selectedAreaPosition.innerHeight -
                 this.#cardHeight;
-
             this.selectedAreaPosition.verticleCenter = this.selectedAreaPosition.top +
                 ((this.selectedAreaPosition.innerHeight -
-                    this.selectedAreaPosition.top) / 2)
+                    this.selectedAreaPosition.top) / 2);
 
-            this.spread();
+            this.#spread();
         };
-        img.src = '/cover.png';
-
-
-
     }
 
     /**
      * 현재생성돼있는 dom 요소의 데이터를 this.cardList에 업데이트
      */
-    updateList() {
+    #updateList() {
         this.cardField.querySelectorAll('li').forEach((item, idx) => {
             item.setAttribute('data-id', '');
             item.setAttribute('data-id', this.cardList[idx].data.id);
             this.cardList[idx].dom = item;
-            item.querySelector('img').src = this.cardList[idx].data.imgUrl;
-
-            //----------------------   임시 ------------------------------------
-            // item.querySelector('img').src = this.cardList[idx].data.imgUrl;
-            item.querySelector('img').src = '/cover.png';
         });
     }
 
-    randomList() {
+    #randomList() {
         this.cardList.sort(() => Math.random() - 0.5);
         this.topCardList = Array.from(this.cardList).slice(0, this.MAXCARDS_NUM);
         this.bottomCardList = Array.from(this.cardList).slice(this.MAXCARDS_NUM);
     }
 
-    spread() {
+    /**
+     * 카드 펼쳐지기 -> ( 초기화시 )
+     */
+    #spread() {
         this.#stopAnimation();
 
         //카드 펼치기
@@ -182,38 +182,6 @@ class TaroCard {
         }
     }
 
-    /**
-     * 카드를 섞음 -> rerender하지 않고 cardList를 update 함 
-     */
-    shuffle() {
-        //class삭제
-        this.cardField.querySelector('ul').classList.remove('clickable');
-
-
-        //shuffle, spread, click중일수있음
-
-
-        //click중이거나 클릭된게 있을때
-        if (this.animation?.click?.playState == 'running' ||
-            this.cardField.querySelectorAll('li.clicked').length != 0) {
-            this.#stopAnimation();
-            this.resetCardState();
-            if (this.animation.flipBack && this.animation.flipBack.playState == 'running') {
-                this.animation.flipBack.onfinish = () => {
-                    this.cardField.querySelectorAll('li img.back').forEach(item => {
-                        item.remove();
-                    });
-                    this.playShuffleAnimation();
-                }
-            } else {
-                //플립백은 있지만 끝났을때
-                this.playShuffleAnimation();
-            }
-        } else {
-            this.resetCardState();
-            this.playShuffleAnimation();
-        }
-    }
 
     playShuffleAnimation() {
         this.#stopAnimation('spread', 'shuffle');
@@ -229,8 +197,8 @@ class TaroCard {
     }
 
     animateshuffle() {
-        this.randomList();
-        this.updateList();
+        this.#randomList();
+        this.#updateList();
 
         //shffle -> 애니메이션 멈춤..
         this.#stopAnimation();
@@ -326,11 +294,8 @@ class TaroCard {
                 // class추가
                 this.cardField.querySelector('ul').classList.add('clickable');
             }
-
         }
-
     }
-
 
 
     #calculateVw(px) {
@@ -453,7 +418,7 @@ class TaroCard {
     }
 
 
-    resetCardState() {
+    #resetCardState() {
         //shuffle -> flip 카드 reset
         //back요소 삭제,
         //front 뒤집기
