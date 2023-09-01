@@ -6,15 +6,18 @@
 //플립 모션 -> 수정구슬...? 화면에 보여지고 아래로 펼쳐지는..?
 
 
+let con = console.log;
 
 class TaroCard {
     #cardHeight;
     constructor() {
+        this.field = document.querySelector('.card-wrap');
         this.cardField = document.querySelector('.card-select-wrap');
         this.cardList = [];
         this.MAXCARDS_NUM = 12;
         this.CARD_ROW_GAP = 20;
         this.animation = {};
+        this.selectedAreaPosition = {}
     }
 
     init(cardObj) {
@@ -27,9 +30,23 @@ class TaroCard {
         var img = new Image();
         img.onload = () => {
             this.#cardHeight = document.querySelector('.card-select-wrap li').offsetHeight;
+
+            //카드펼쳐지는 영역 position top
+            this.selectedAreaPosition.top = this.#cardHeight * 2 + this.CARD_ROW_GAP;
+            this.selectedAreaPosition.innerHeight = this.field.clientHeight -
+                (parseInt(window.getComputedStyle(this.field).paddingTop) +
+                    parseInt(window.getComputedStyle(this.field).paddingBottom));
+            this.selectedAreaPosition.bottom = this.selectedAreaPosition.innerHeight -
+                this.#cardHeight;
+
+            this.selectedAreaPosition.verticleCenter = this.selectedAreaPosition.top +
+                ((this.selectedAreaPosition.innerHeight -
+                    this.selectedAreaPosition.top) / 2)
+
             this.spread();
         };
         img.src = '/cover.png';
+
     }
 
     reset() {
@@ -50,6 +67,7 @@ class TaroCard {
         this.cardField.appendChild(cardUl);
         this.cardList.forEach((item, idx) => {
             const cardLi = document.createElement('li');
+            cardLi.classList.add('unClick');
 
             cardLi.setAttribute('data-id', '');
             cardLi.setAttribute('data-id', item.data.id);
@@ -61,7 +79,32 @@ class TaroCard {
             cardLi.innerHTML = `<img src="/cover.png" alt="">`;
 
             cardUl.appendChild(cardLi);
+
+
+            //clickEvent 추가
+            cardLi.addEventListener('click', (e) => {
+                // con(e.target.closest('li').classList)
+                if (!e.target.closest('ul').classList.contains('clickable')) {
+                    return;
+                }
+                if (!e.target.closest('li').classList.contains('unClick')) {
+                    return;
+                }
+                this.#clickAnimation(e);
+
+                //animation끝난후 clickable class추가로 수정 -> 아래코드 주석
+                // if (this.#checkRunningAnimation().length == 0) {
+                //     this.#clickAnimation(e);
+                //     return;
+                // }
+                // this.#checkRunningAnimation().onfinish = () => {
+                //     this.#clickAnimation(e);
+                // }
+            });
         });
+
+
+
     }
 
     /**
@@ -87,8 +130,6 @@ class TaroCard {
     }
 
     spread() {
-
-
         this.#stopAnimation();
 
         //카드 펼치기
@@ -99,8 +140,6 @@ class TaroCard {
             item.dom.animate([
                 { left: this.#calculateLeftPosition(this.topCardList, idx) }],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
-            //class추가
-            item.dom.parentNode.classList.add('clickable');
         });
 
         this.bottomCardList.forEach((item, idx) => {
@@ -114,9 +153,13 @@ class TaroCard {
             this.animation.spread = item.dom.animate([{ left: this.#calculateLeftPosition(this.bottomCardList, idx) },],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
 
-            //class추가
-            item.dom.parentNode.classList.add('clickable');
         });
+
+        if (!this.animation.spread) return;
+        this.animation.spread.onfinish = () => {
+            // class추가
+            this.cardField.querySelector('ul').classList.add('clickable');
+        }
     }
 
     /**
@@ -136,22 +179,14 @@ class TaroCard {
         } else {
             this.animateshuffle();
         }
-
-
-        //완료후
-        //class추가
-        // this.cardField.querySelector('ul').classList.remove('clickable');
-
     }
 
     animateshuffle() {
         this.randomList();
         this.updateList();
+
         //shffle -> 애니메이션 멈춤..
         this.#stopAnimation();
-
-
-
 
         const top = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) / 2;
         const topTimeForAnimation = 1300;
@@ -191,70 +226,60 @@ class TaroCard {
 
 
         //카드 펼치기
-        if (this.animation.shuffle.playState != 'finished') {
-            //애니메이션 중일때만.. 체크됨 
-            this.animation.shuffle.onfinish = () => {
-                console.log(' shuffle 애니메이션 끝');
+        //애니메이션 중일때만.. 체크됨 
+        this.animation.shuffle.onfinish = () => {
+            // console.log(' shuffle 애니메이션 끝');
+
+            //위치 변경(0)
+            this.cardList.forEach((item, idx) => {
+                item.dom.style.zIndex = 0;
+                item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }],
+                    { duration: 300, fill: 'forwards' })
+            });
+
+            const topTimeForAnimation = 500;
+            let rightPosition = 0;
+            let topDelay = 0;
+            this.topCardList.forEach((item, idx) => {
+
+                let leftPosition = this.#calculateLeftPosition(this.topCardList, idx);
+                if (idx == 0) {
+                    leftPosition = 0;
+                }
+                const delay = topTimeForAnimation / this.topCardList.length * idx;
+                rightPosition = leftPosition;
+                topDelay = topTimeForAnimation / this.topCardList.length * (idx - 2);
+
+                item.dom.animate([
+                    { left: leftPosition }],
+                    { duration: topTimeForAnimation, fill: "forwards", delay });
+            });
 
 
-                //위치 변경(0)
-                this.cardList.forEach((item, idx) => {
-                    item.dom.style.zIndex = 0;
-                    item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }],
-                        { duration: 300, fill: 'forwards' })
-                });
+            this.bottomCardList.forEach((item, idx) => {
+                //top
+                const topVw = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) + 'vw';
 
-                const topTimeForAnimation = 500;
-                let rightPosition = 0;
-                let topDelay = 0;
-                this.topCardList.forEach((item, idx) => {
+                //윗줄과 함께 이동
+                item.dom.animate([
+                    { left: 0, top: 0 }, { left: rightPosition, top: 0 },],
+                    { duration: topTimeForAnimation, fill: "forwards", delay: topDelay });
+                //아래줄로 이동
+                item.dom.animate([
+                    { left: rightPosition, top: 0 }, { left: 0, top: topVw },],
+                    { duration: 400, fill: "forwards", delay: topDelay + topTimeForAnimation });
+                //펼쳐지기
+                this.animation.shuffleSpread = item.dom.animate([{ top: topVw, left: this.#calculateLeftPosition(this.bottomCardList, idx) },],
+                    { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + 400 });
 
-                    let leftPosition = this.#calculateLeftPosition(this.topCardList, idx);
-                    if (idx == 0) {
-                        leftPosition = 0;
-                    }
-                    const delay = topTimeForAnimation / this.topCardList.length * idx;
-                    rightPosition = leftPosition;
-                    topDelay = topTimeForAnimation / this.topCardList.length * (idx - 2);
+            });
 
-                    item.dom.animate([
-                        { left: leftPosition }],
-                        { duration: topTimeForAnimation, fill: "forwards", delay });
-
-
-
-                    //class추가
-                    item.dom.parentNode.classList.add('clickable');
-                });
-
-
-
-                this.bottomCardList.forEach((item, idx) => {
-                    //top
-                    const topVw = this.#calculateVw(this.#cardHeight + this.CARD_ROW_GAP) + 'vw';
-
-
-
-                    //윗줄과 함께 이동
-                    item.dom.animate([
-                        { left: 0, top: 0 }, { left: rightPosition, top: 0 },],
-                        { duration: topTimeForAnimation, fill: "forwards", delay: topDelay });
-                    //아래줄로 이동
-                    item.dom.animate([
-                        { left: rightPosition, top: 0 }, { left: 0, top: topVw },],
-                        { duration: 400, fill: "forwards", delay: topDelay + topTimeForAnimation });
-                    //펼쳐지기
-                    item.dom.animate([{ top: topVw, left: this.#calculateLeftPosition(this.bottomCardList, idx) },],
-                        { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + 400 });
-
-
-                    // class추가
-                    item.dom.parentNode.classList.add('clickable');
-                });
-
+            if (!this.animation.shuffleSpread) return;
+            this.animation.shuffleSpread.onfinish = () => {
+                // class추가
+                this.cardField.querySelector('ul').classList.add('clickable');
             }
-        } else {
-            // this.spread();
+
         }
 
     }
@@ -285,19 +310,88 @@ class TaroCard {
         }
     }
 
+    #checkRunningAnimation() {
+        const result = [];
+        for (const key in this.animation) {
+            (this.animation[key].playState == 'running') && result.push(this.animation[key]);
+        }
+        return result;
+    }
 
     //animation
-    //1. reset -> line
+    //1. reset -> spread
     //2. shuffle
-    //3. shuffle -> line
+    //3. shuffle -> spread
 
 
 
+    #clickAnimation(e) {
+        const target = e.target.parentNode;
+        target.classList.replace('unClick', 'clicked');
+
+        //뽑히는 motion
+        target.animate([
+            { transform: 'translateY(-35%)' },
+        ],
+            { duration: 600, fill: "backwards" });
+        target.animate([
+            { opacity: 0 },
+        ],
+            { duration: 600, delay: 300, fill: "backwards" });
 
 
-    addEventListener() {
+        //정중앙에 flip  
+        this.animation.center = target.animate([
+            { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
+            { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 0 },
+            { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 1 },
+        ],
+            { duration: 1200, delay: 900, fill: "forwards" });
+
+        //back 요소 추가
+        this.animation.center.onfinish = () => {
+            const back = document.createElement('img');
+            const imgUrl = this.cardList.find(item => item.data.id == target.getAttribute('data-id')).data.imgUrl;
+            back.setAttribute('src', imgUrl);
+            // back.style.position = 'absolute';
+            // back.style.left = '0'
+            back.style.transform = 'rotateY(180deg)';
+            target.querySelector('img').style.position = 'absolute';
+            // target.querySelector('img').style.transform = 'rotateY( 180deg )';
+            target.querySelector('img').style.zIndex = 2;
+            target.appendChild(back);
+
+            // target.querySelector('img').animate([
+            //     { position: 'absolute', transform: 'rotateY(180deg)' },
+            // ],
+            //     { duration: 0, fill: "backwards" });
+            // target.querySelector('img').animate([
+            //     { transform: 'rotateY(180deg)' },
+            // ],
+            //     { duration: 600, fill: "forwards" });
+            // target.animate({
+            //     transform: 'translate(-50%,-50%) scale(2) rotateY( 180deg )'
+            // },
+            //     { duration: 600, fill: "forwards" });
+
+        }
+
+
+
+        //하단영역 중앙정렬
+        // target.animate([
+        //     { opacity: 0, top: this.selectedAreaPosition.top + 'px' },
+        //     {
+        //         top: this.selectedAreaPosition.verticleCenter + 'px',
+        //         transform: 'translateY(-50%)'
+        //     },
+        // ],
+        //     { duration: 600, delay: 2100, fill: "forwards" });
+
+
 
     }
+
 
 }
 

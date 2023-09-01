@@ -11,7 +11,7 @@
 <style>
     #canvasContainer {
         width: 100%;
-        height: 800px;
+        height: calc(100vh - 42px);
         background-color: #540e80;
         border: 10px solid #3f0960;
         box-sizing: border-box;
@@ -28,6 +28,7 @@
     .card-wrap ul {
         position: relative;
         display: flex;
+        height: 100%;
     }
 
     .card-wrap ul li {
@@ -35,23 +36,41 @@
         left: -100%;
         width: 13vw;
         max-width: 120px;
-        cursor: pointer;
         transition: 0.3s;
         /* z-index: 1; */
+
     }
 
-    .card-wrap ul.clickable li:hover {
+    .card-wrap ul.clickable li.unClick {
+        cursor: pointer;
+    }
+
+    .card-wrap ul.clickable li.unClick:hover {
         transform: translateY(-7%) !important;
     }
 
     .card-wrap ul li img {
+        /* position: absolute; */
+        top: 0;
+        left: 0;
         width: 100%;
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+        transition: transform ease-in-out 600ms;
     }
 
     button {
         padding: 10px;
         border: 1px solid #000;
     }
+
+    .card-select-wrap {
+        height: 100%;
+    }
+
+    /* .selected-wrap {
+        border: 1px solid #000;
+    } */
 </style>
 
 <body>
@@ -62,10 +81,15 @@
             <div class="seleted-wrap">
             </div>
         </div>
+
+        <!-- 
+        <div class="selected-wrap">
+
+        </div> -->
     </div>
     <button onclick="reset()">카드 초기화</button>
     <button onclick="shuffleCards()">카드 섞기</button>
-    <button onclick="sufflelikeline()">카드라인섞기</button>
+    <!-- <button onclick="sufflelikeline()">카드라인섞기</button> -->
     <!-- <button onclick="sufflelikeline2()">카드라인(호선)</button> -->
     <!-- <button onclick="sufflelikecircle()">카드원형섞기</button> -->
     <script src="card_suffle.js"></script>
