@@ -38,7 +38,6 @@
         max-width: 120px;
         transition: 0.3s;
         /* z-index: 1; */
-
     }
 
     .card-wrap ul.clickable li.unClick {
@@ -58,6 +57,13 @@
         transform-style: preserve-3d;
         transition: transform ease-in-out 600ms;
     }
+
+    .card-wrap ul li img.back {
+        /* 임시 이미지 */
+        border-radius: 1.5vw;
+        overflow: hidden;
+    }
+
 
 
     button {
@@ -99,30 +105,30 @@
 
     <script>
         const taroCard = new TaroCard();
-        const cardDataList = [{ id: 1, imgUrl: '/card01.png', title: 'taro01' },
-        { id: 2, imgUrl: '/card01.png', title: 'taro02' },
-        { id: 3, imgUrl: '/card01.png', title: 'taro03' },
-        { id: 4, imgUrl: '/card01.png', title: 'taro04' },
-        { id: 5, imgUrl: '/card01.png', title: 'taro05' },
-        { id: 6, imgUrl: '/card01.png', title: 'taro06' },
-        { id: 7, imgUrl: '/card01.png', title: 'taro07' },
-        { id: 8, imgUrl: '/card01.png', title: 'taro08' },
-        { id: 9, imgUrl: '/card01.png', title: 'taro09' },
-        { id: 10, imgUrl: '/card01.png', title: 'taro10' },
-        { id: 11, imgUrl: '/card01.png', title: 'taro11' },
-        { id: 12, imgUrl: '/card01.png', title: 'taro12' },
-        { id: 13, imgUrl: '/card01.png', title: 'taro13' },
-        { id: 14, imgUrl: '/card01.png', title: 'taro14' },
-        { id: 15, imgUrl: '/card01.png', title: 'taro15' },
-        { id: 16, imgUrl: '/card01.png', title: 'taro16' },
-        { id: 17, imgUrl: '/card01.png', title: 'taro17' },
-        { id: 18, imgUrl: '/card01.png', title: 'taro18' },
-        { id: 19, imgUrl: '/card01.png', title: 'taro19' },
-        { id: 20, imgUrl: '/card01.png', title: 'taro20' },
-        { id: 21, imgUrl: '/card01.png', title: 'taro21' },
-        { id: 22, imgUrl: '/card01.png', title: 'taro22' },
-        { id: 23, imgUrl: '/card01.png', title: 'taro23' },
-        { id: 24, imgUrl: '/card01.png', title: 'taro24' },
+        const cardDataList = [{ id: 1, imgUrl: 'https://picsum.photos/id/101/120/186', title: 'taro01' },
+        { id: 2, imgUrl: 'https://picsum.photos/id/102/120/186', title: 'taro02' },
+        { id: 3, imgUrl: 'https://picsum.photos/id/103/120/186', title: 'taro03' },
+        { id: 4, imgUrl: 'https://picsum.photos/id/104/120/186', title: 'taro04' },
+        { id: 5, imgUrl: 'https://picsum.photos/id/1055/120/186', title: 'taro05' },
+        { id: 6, imgUrl: 'https://picsum.photos/id/106/120/186', title: 'taro06' },
+        { id: 7, imgUrl: 'https://picsum.photos/id/107/120/186', title: 'taro07' },
+        { id: 8, imgUrl: 'https://picsum.photos/id/108/120/186', title: 'taro08' },
+        { id: 9, imgUrl: 'https://picsum.photos/id/109/120/186', title: 'taro09' },
+        { id: 10, imgUrl: 'https://picsum.photos/id/110/120/186', title: 'taro10' },
+        { id: 11, imgUrl: 'https://picsum.photos/id/111/120/186', title: 'taro11' },
+        { id: 12, imgUrl: 'https://picsum.photos/id/112/120/186', title: 'taro12' },
+        { id: 13, imgUrl: 'https://picsum.photos/id/113/120/186', title: 'taro13' },
+        { id: 14, imgUrl: 'https://picsum.photos/id/114/120/186', title: 'taro14' },
+        { id: 15, imgUrl: 'https://picsum.photos/id/115/120/186', title: 'taro15' },
+        { id: 16, imgUrl: 'https://picsum.photos/id/116/120/186', title: 'taro16' },
+        { id: 17, imgUrl: 'https://picsum.photos/id/117/120/186', title: 'taro17' },
+        { id: 18, imgUrl: 'https://picsum.photos/id/118/120/186', title: 'taro18' },
+        { id: 19, imgUrl: 'https://picsum.photos/id/119/120/186', title: 'taro19' },
+        { id: 20, imgUrl: 'https://picsum.photos/id/120/120/186', title: 'taro20' },
+        { id: 21, imgUrl: 'https://picsum.photos/id/121/120/186', title: 'taro21' },
+        { id: 22, imgUrl: 'https://picsum.photos/id/122/120/186', title: 'taro22' },
+        { id: 23, imgUrl: 'https://picsum.photos/id/123/120/186', title: 'taro23' },
+        { id: 24, imgUrl: 'https://picsum.photos/id/124/120/186', title: 'taro24' },
         ];
         taroCard.init(cardDataList);
 
