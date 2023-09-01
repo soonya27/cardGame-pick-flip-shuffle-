@@ -79,6 +79,7 @@ class TaroCard {
                 if (!e.target.closest('li').classList.contains('unClick')) {
                     return;
                 }
+                e.target.parentNode.classList.replace('unClick', 'clicked');
                 if (this.animation.click && this.animation.click.playState == 'running') {
                     return;
                 }
@@ -189,22 +190,27 @@ class TaroCard {
         this.cardField.querySelector('ul').classList.remove('clickable');
 
 
-        //카드 뽑힌게 있으면 -> 
-        //카드 뽑는중이면
-        if (this.animation.click && this.animation.click.some(item => item.playState == 'running')) {
-            console.log(this.animation.click)
+        //shuffle, spread, click중일수있음
+
+
+        //click중이거나 클릭된게 있을때
+        if (this.animation?.click?.playState == 'running' ||
+            this.cardField.querySelectorAll('li.clicked').length != 0) {
             this.#stopAnimation();
-            // this.animation.click[this.animation.click.length - 1].onfinish = () => {
-            this.resetFlip();
-            this.animation.flipBack.onfinish = () => {
-                this.cardField.querySelectorAll('li img.back').forEach(item => {
-                    item.remove();
-                });
+            this.resetCardState();
+            if (this.animation.flipBack && this.animation.flipBack.playState == 'running') {
+                this.animation.flipBack.onfinish = () => {
+                    this.cardField.querySelectorAll('li img.back').forEach(item => {
+                        item.remove();
+                    });
+                    this.playShuffleAnimation();
+                }
+            } else {
+                //플립백은 있지만 끝났을때
                 this.playShuffleAnimation();
             }
-            // }
-
         } else {
+            this.resetCardState();
             this.playShuffleAnimation();
         }
     }
@@ -368,7 +374,7 @@ class TaroCard {
 
     #clickAnimation(e) {
         const target = e.target.parentNode;
-        target.classList.replace('unClick', 'clicked');
+        // target.classList.replace('unClick', 'clicked');
 
 
         //서버이미지 임시------------ 이미지 로딩추가 ....
@@ -382,47 +388,41 @@ class TaroCard {
             back.setAttribute('src', imgUrl);
 
             //뽑는 motion
-            this.animation.click = [];
-            const pickMotion01 = e.target.parentNode.animate([
+            this.animation.click = e.target.parentNode.animate([
                 { transform: 'translateY(-35%)' },
             ],
                 { duration: 600, fill: "forwards" });
-            const pickMotion02 = e.target.parentNode.animate([
+            this.animation.click = e.target.parentNode.animate([
                 { opacity: 0 },
             ],
                 { duration: 600, delay: 300, fill: "forwards" });
-            this.animation.click.push(pickMotion01)
-            this.animation.click.push(pickMotion02)
 
             //뽑히는동안은 다른카드 pick막기
             e.target.closest('ul').classList.remove('clickable');
 
             //정중앙에서 flip  
-            const filpMotion = target.animate([
+            this.animation.click = target.animate([
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 0 },
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 1, zIndex: 9999 },
             ],
                 { duration: 1200, delay: 900, fill: "forwards" });
-            this.animation.click.push(filpMotion)
             //back 뒷면카드 요소 추가
-            filpMotion.onfinish = () => {
+            this.animation.click.onfinish = () => {
 
                 back.style.transform = 'rotateY(180deg)';
                 target.appendChild(back);
 
                 //front 뒤집기
-                const flipBack01 = target.querySelector('img.front').animate({
+                this.animation.click = target.querySelector('img.front').animate({
                     transform: 'rotateY( 180deg )',
                 },
                     { duration: 600, fill: "forwards" });
 
-                const flipBack02 = back.animate({
+                this.animation.click = back.animate({
                     transform: 'rotateY( 0deg )',
                 },
                     { duration: 600, fill: "forwards" });
-                this.animation.click.push(flipBack01)
-                this.animation.click.push(flipBack02)
 
                 //하단영역 중앙정렬
                 const selectedCardPositionList = [
@@ -431,7 +431,7 @@ class TaroCard {
                     [{ top: 0, left: 0 }, { top: 0, left: 0 }, { top: 0, left: 0 }],
                     [{ top: 0, left: 0 }, { top: 0, left: 0 }, { top: 0, left: 0 }, { top: 0, left: 0 }]
                 ];
-                const positionCenter = target.animate([
+                this.animation.click = target.animate([
                     {
                         top: this.selectedAreaPosition.verticleCenter + 'px',
                         left: '50%',
@@ -441,9 +441,8 @@ class TaroCard {
                 ],
                     { duration: 600, delay: 1200, fill: "forwards" });
 
-                this.animation.click.push(positionCenter)
 
-                positionCenter.onfinish = () => {
+                this.animation.click.onfinish = () => {
                     e.target.closest('ul').classList.add('clickable');
                 }
             }
@@ -454,16 +453,22 @@ class TaroCard {
     }
 
 
-    resetFlip() {
+    resetCardState() {
         //shuffle -> flip 카드 reset
         //back요소 삭제,
         //front 뒤집기
         //clicked -> unClick
         this.cardField.querySelectorAll('li.clicked').forEach(item => {
-            item.classList.replace('clicked', 'unClick');
-            // item.querySelector('img.front').style.transform = 'rotateY(0deg )';
+            //style 되돌리기
+            item.animate({
+                opacity: 1
+            },
+                { duration: 1, fill: "forwards" });
 
-            (item.querySelector('img.back'))
+            if (item.querySelector('img.back') == null) {
+                item.classList.replace('clicked', 'unClick');
+                return;
+            }
             //반대로 뒤집기  front->앞 back->뒤
             item.querySelector('img.front').animate({
                 transform: 'rotateY(0deg)',
@@ -473,6 +478,7 @@ class TaroCard {
                 transform: 'rotateY( 180deg )',
             },
                 { duration: 600, fill: "forwards" });
+            item.classList.replace('clicked', 'unClick');
 
         });
 
