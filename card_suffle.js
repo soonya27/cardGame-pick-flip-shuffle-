@@ -80,7 +80,7 @@ class TaroCard {
         this.#cardList.forEach(item => {
             item.dom.style.left = resetPosition;
         });
-        setTimeout(playSound(spreadSound), 2000)
+        // setTimeout(playSound(spreadSound), 2000);
     }
 
     /**
@@ -215,7 +215,7 @@ class TaroCard {
     }
 
     /**
-     * 카드 펼쳐지기 -> ( 초기화시 )
+     * 카드 펼쳐지기 -> ( reset )
      */
     #spread() {
         this.#stopAnimation();
@@ -306,10 +306,7 @@ class TaroCard {
 
 
         //카드 펼치기
-        //애니메이션 중일때만.. 체크됨 
         this.#animation.shuffle.onfinish = () => {
-            // console.log(' shuffle 애니메이션 끝');
-
             //위치 변경(0)
             this.#cardList.forEach((item, idx) => {
                 // item.dom.style.zIndex = 0;
@@ -454,7 +451,7 @@ class TaroCard {
                     [{ top: this.#selectedAreaPosition.verticleCenter, left: '20%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '60%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '80%' }],
                     [{ top: this.#selectedAreaPosition.verticleCenter, left: '10%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '50%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '70%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '90%' }],
                 ];
-                const position = selectedCardPositionList[this.selectedList.length - 1][selectedCardPositionList[this.selectedList.length - 1].length - 1]
+                const position = selectedCardPositionList[this.selectedList.length - 1][selectedCardPositionList[this.selectedList.length - 1].length - 1];
 
                 if (this.selectedList.length > 1) {
                     const length = this.selectedList.length;
