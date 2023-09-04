@@ -397,7 +397,7 @@ class TaroCard {
 
         //서버이미지 임시------------ 이미지 로딩추가 ....
         const img = new Image();
-        img.src = '/cover.png';
+        img.src = './cover.png';
         img.onload = () => {
 
             const back = document.createElement('img');
