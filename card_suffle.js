@@ -173,6 +173,12 @@ class TaroCard {
                 ((this.#selectedAreaPosition.innerHeight -
                     this.#selectedAreaPosition.top) / 2);
 
+
+            //(this.#selectedAreaPosition)카드 펼쳐질 영역 ui
+            // this.#cardField.style.background = `url(/card01.png) no-repeat 50% ${this.#selectedAreaPosition.top}px`;
+            // this.#cardField.style.backgroundSize = `cover`;
+
+
             this.#spread();
         };
     }
