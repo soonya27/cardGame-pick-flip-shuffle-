@@ -253,7 +253,7 @@ class TaroCard {
 
         const top = this.#calculateVw(this.#cardHeight + this.#CARD_ROW_GAP) / 2;
         const topTimeForAnimation = 1300;
-
+        //------------------ ** 두번째부터 다르게...... ------------------------------//
         this.#cardListTop.forEach((item, idx) => {
             //가운데 위치
             item.dom.animate([{ top: top + 'vw', left: '50%', transform: 'translateX(-50%)' },],
@@ -263,7 +263,7 @@ class TaroCard {
             const delay = topTimeForAnimation / this.#cardListTop.length * idx;
 
             item.dom.animate([
-                { left: '50%', },
+                { left: '50%' },
                 { left: '35%' },
                 { left: '50%', zIndex: this.#cardListTop.length + idx }
             ],
@@ -278,12 +278,14 @@ class TaroCard {
             //섞는 motion
             const delay = topTimeForAnimation / this.#cardListBottom.length * idx;
 
+            //------------------ ** zindex  ...... ------------------------------//
             this.#animation.shuffle = item.dom.animate([
                 { left: '50%' },
                 { left: '65%' },
                 { left: '50%', zIndex: this.#cardListBottom.length + idx }
             ],
                 { duration: topTimeForAnimation, delay: delay, fill: "forwards" });
+
         });
 
 
@@ -295,7 +297,7 @@ class TaroCard {
 
             //위치 변경(0)
             this.#cardList.forEach((item, idx) => {
-                item.dom.style.zIndex = 0;
+                // item.dom.style.zIndex = 0;
                 item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }],
                     { duration: 300, fill: 'forwards' })
             });
@@ -490,33 +492,33 @@ class TaroCard {
 
     }
 
-
+    /**
+     * 뒤집어진 카드 reset
+     */
     #resetCardState() {
-        //shuffle -> flip 카드 reset
-        //back요소 삭제,
-        //front 뒤집기
-        //clicked -> unClick
-        this.#cardField.querySelectorAll('li.clicked').forEach(item => {
+        this.selectedList.forEach(item => {
             //style 되돌리기
-            item.animate({
+            item.dom.animate({
                 opacity: 1
             },
                 { duration: 1, fill: "forwards" });
 
-            if (item.querySelector('img.back') == null) {
-                item.classList.replace('clicked', 'unClick');
+            if (item.dom.querySelector('img.back') == null) {
+                item.dom.classList.replace('clicked', 'unClick');
                 return;
             }
+            //------------------ ** 가끔 씹히는듯.... ------------------------------//
+
             //반대로 뒤집기  front->앞 back->뒤
-            item.querySelector('img.front').animate({
+            item.dom.querySelector('img.front').animate({
                 transform: 'rotateY(0deg)',
             },
-                { duration: 600, fill: "forwards" });
-            this.#animation.flipBack = item.querySelector('img.back').animate({
+                { duration: 600, delay: 1, fill: "forwards" });
+            this.#animation.flipBack = item.dom.querySelector('img.back').animate({
                 transform: 'rotateY( 180deg )',
             },
-                { duration: 600, fill: "forwards" });
-            item.classList.replace('clicked', 'unClick');
+                { duration: 600, delay: 1, fill: "forwards" });
+            item.dom.classList.replace('clicked', 'unClick');
 
         });
 
