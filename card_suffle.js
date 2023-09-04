@@ -15,14 +15,15 @@ const coverIgmUrl = '/cover.png';
  * - shuffle() : void
  * 
  * property
- * - cardCount : number
- * - cardList : Array [{data:{id,imgUrl,title}, dom :li }...]
- * - selectedList : Array [{data:{id,imgUrl,title}, dom :li }...]
+ * - cardCount {number} : 전체 카드 수
+ * - maxSelectCount {number} : 선택가능한 카드 수
+ * - cardList {Array[{data:{id,imgUrl,title}, dom :li }...]} : 카드 객체 리스트
+ * - selectedList {Array [{data:{id,imgUrl,title}, dom :li }...]} : 선택된 카드 객체 리스트
  */
 class TaroCard {
     #MAXCARDS_NUM;
     #CARD_ROW_GAP;
-    #MAX_SELCET_CNT;
+    #MAX_SELECET_CNT;
     #field;
     #cardField;
     #cardList;
@@ -38,9 +39,9 @@ class TaroCard {
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
         if (maxCnt > 5) {
             con('최대 선택가능한 카드는 5개입니다.');
-            this.#MAX_SELCET_CNT = 5;
+            this.#MAX_SELECET_CNT = 5;
         } else {
-            this.#MAX_SELCET_CNT = maxCnt;
+            this.#MAX_SELECET_CNT = maxCnt;
         }
         this.#field = document.querySelector('.card-wrap');
         this.#cardField = document.querySelector('.card-select-wrap');
@@ -104,8 +105,13 @@ class TaroCard {
             this.#playShuffleAnimation();
         }
     }
+
     get cardCount() {
         return this.#cardCount;
+    }
+
+    get maxSelectCount() {
+        return this.#MAX_SELECET_CNT;
     }
 
     get cardList() {
@@ -113,11 +119,6 @@ class TaroCard {
     }
 
     get selectedList() {
-        // const selectedLiList = Array.from(this.#cardField.querySelectorAll('li.clicked'));
-        // this.selcetedList = this.#cardList.filter(item => selectedLiList.includes(item.dom));
-        // return this.selcetedList;
-        //-> li로 가져오니까 선택된 순서대로 가져오지 못함..
-
         return this.#selcetedList;
     }
 
@@ -380,8 +381,6 @@ class TaroCard {
         return result;
     }
 
-
-
     #clickAnimation(e) {
         const target = e.target.parentNode;
         // target.classList.replace('unClick', 'clicked');
@@ -480,16 +479,13 @@ class TaroCard {
 
                 this.#animation.click.onfinish = () => {
                     //모두 선택됐으면 click막기
-                    if (this.selectedList.length == this.#MAX_SELCET_CNT) {
+                    if (this.selectedList.length == this.#MAX_SELECET_CNT) {
                         return;
                     }
                     e.target.closest('ul').classList.add('clickable');
                 }
             }
-
-
         };
-
     }
 
     /**

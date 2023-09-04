@@ -78,21 +78,29 @@
     /* .selected-wrap {
         border: 1px solid #000;
     } */
+
+    .info {
+        padding: 0.694vw 2.778vw;
+        text-align: right;
+    }
+
+    .info strong {
+        font-weight: normal;
+        color: #fff;
+    }
 </style>
 
 <body>
     <div id="canvasContainer">
+        <div class="info">
+            <strong>선택 가능한 카드 : <span id="maxNums"></span> 장</strong>
+        </div>
         <div class="card-wrap">
             <div class="card-select-wrap">
             </div>
             <div class="seleted-wrap">
             </div>
         </div>
-
-        <!-- 
-        <div class="selected-wrap">
-
-        </div> -->
     </div>
     <button onclick="reset()">카드 초기화</button>
     <button onclick="shuffleCards()">카드 섞기</button>
@@ -131,6 +139,7 @@
         ];
 
         const taroCard = new TaroCard(cardDataList, 5);
+        document.querySelector('#maxNums').innerHTML = taroCard.maxSelectCount;
 
         function reset() {
             taroCard.reset();
