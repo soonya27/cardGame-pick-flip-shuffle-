@@ -1,8 +1,9 @@
-
-
 'use strict';
 let con = console.log;
 const coverIgmUrl = '/cover.png';
+
+//     수정중 *** 검색
+
 
 /**
  * TaroCard
@@ -26,11 +27,13 @@ class TaroCard {
     #MAX_SELECET_CNT;
     #field;
     #cardField;
+    #cardFieldWidth;
     #cardList;
     #cardListTop;
     #cardListBottom;
     #cardCount;
     #cardHeight;
+    #cardWidth;
     #selectedAreaPosition;
     #animation;
     #selcetedList;
@@ -157,6 +160,12 @@ class TaroCard {
         coverImg.onload = () => {
             //img높이값
             this.#cardHeight = document.querySelector('.card-select-wrap li img').offsetHeight;
+            this.#cardWidth = document.querySelector('.card-select-wrap li img').offsetWidth;
+
+            this.#cardFieldWidth = this.#field.clientWidth -
+                (parseInt(window.getComputedStyle(this.#field).paddingLeft) +
+                    parseInt(window.getComputedStyle(this.#field).paddingRight));
+
             //li높이값 수동으로지정 -> 안의 img가 position:absolute이기때문에
             this.#cardField.querySelectorAll('li').forEach((item, idx) => {
                 item.style.height = this.#cardHeight + 'px';
@@ -173,11 +182,10 @@ class TaroCard {
                 ((this.#selectedAreaPosition.innerHeight -
                     this.#selectedAreaPosition.top) / 2);
 
-
+            //------------------ *** 카드 펼쳐질 영역 ui  bgimg 위치 css ...... ------------------------------//
             //(this.#selectedAreaPosition)카드 펼쳐질 영역 ui
             // this.#cardField.style.background = `url(/card01.png) no-repeat 50% ${this.#selectedAreaPosition.top}px`;
             // this.#cardField.style.backgroundSize = `cover`;
-
 
             this.#spread();
         };
@@ -215,6 +223,7 @@ class TaroCard {
             item.dom.animate([
                 { left: this.#calculateLeftPosition(this.#cardListTop, idx) }],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
+            // con(idx)
         });
 
         this.#cardListBottom.forEach((item, idx) => {
@@ -227,7 +236,6 @@ class TaroCard {
 
             this.#animation.spread = item.dom.animate([{ left: this.#calculateLeftPosition(this.#cardListBottom, idx) },],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
-
         });
 
         if (!this.#animation.spread) return;
@@ -236,7 +244,6 @@ class TaroCard {
             this.#cardField.querySelector('ul').classList.add('clickable');
         }
     }
-
 
     #playShuffleAnimation() {
         this.#stopAnimation('spread', 'shuffle');
@@ -260,7 +267,6 @@ class TaroCard {
 
         const top = this.#calculateVw(this.#cardHeight + this.#CARD_ROW_GAP) / 2;
         const topTimeForAnimation = 1300;
-        //------------------ ** 두번째부터 다르게...... ------------------------------//
         this.#cardListTop.forEach((item, idx) => {
             //가운데 위치
             item.dom.animate([{ top: top + 'vw', left: '50%', transform: 'translateX(-50%)' },],
@@ -285,16 +291,14 @@ class TaroCard {
             //섞는 motion
             const delay = topTimeForAnimation / this.#cardListBottom.length * idx;
 
-            //------------------ ** zindex  ...... ------------------------------//
+            //------------------ *** zindex  ...... ------------------------------//
             this.#animation.shuffle = item.dom.animate([
                 { left: '50%' },
                 { left: '65%' },
                 { left: '50%', zIndex: this.#cardListBottom.length + idx }
             ],
                 { duration: topTimeForAnimation, delay: delay, fill: "forwards" });
-
         });
-
 
 
         //카드 펼치기
@@ -314,16 +318,12 @@ class TaroCard {
             let topDelay = 0;
             this.#cardListTop.forEach((item, idx) => {
 
-                let leftPosition = this.#calculateLeftPosition(this.#cardListTop, idx);
-                if (idx == 0) {
-                    leftPosition = 0;
-                }
                 const delay = topTimeForAnimation / this.#cardListTop.length * idx;
-                rightPosition = leftPosition;
+                rightPosition = this.#calculateLeftPosition(this.#cardListTop, idx);
                 topDelay = topTimeForAnimation / this.#cardListTop.length * (idx - 2);
 
                 item.dom.animate([
-                    { left: leftPosition }],
+                    { left: this.#calculateLeftPosition(this.#cardListTop, idx) }],
                     { duration: topTimeForAnimation, fill: "forwards", delay });
             });
 
@@ -348,23 +348,26 @@ class TaroCard {
 
             if (!this.#animation.shuffleSpread) return;
             this.#animation.shuffleSpread.onfinish = () => {
-                // class추가
+                //펼쳐진후 클릭가능(class 추가)
                 this.#cardField.querySelector('ul').classList.add('clickable');
             }
         }
     }
 
-
     #calculateVw(px) {
         return ((px) / window.innerWidth * 100);
     }
 
-
+    /**
+     * spread시 카드 left position
+     * @param {*} cardList 
+     * @param {*} idx 
+     * @returns {string} 
+     */
     #calculateLeftPosition(cardList, idx) {
-        let leftPx = (100 / cardList.length - 1);
-        return Math.ceil(leftPx * idx + 1) + '%';
+        let leftPx = ((this.#cardFieldWidth - this.#cardWidth) / (this.#cardListTop.length - 1));
+        return Math.ceil(leftPx * idx) + 'px';
     }
-
 
     #stopAnimation(...except) {
         for (let key in this.#animation) {
@@ -390,7 +393,6 @@ class TaroCard {
     #clickAnimation(e) {
         const target = e.target.parentNode;
         // target.classList.replace('unClick', 'clicked');
-
 
         //서버이미지 임시------------ 이미지 로딩추가 ....
         const img = new Image();
@@ -422,6 +424,7 @@ class TaroCard {
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 1, zIndex: 9999 },
             ],
                 { duration: 1200, delay: 900, fill: "forwards" });
+
             //back 뒷면카드 요소 추가
             this.#animation.click.onfinish = () => {
 
@@ -439,7 +442,6 @@ class TaroCard {
                 },
                     { duration: 600, fill: "forwards" });
 
-                // con(this.selectedList)
                 //하단영역 중앙정렬
                 const selectedCardPositionList = [
                     [{ top: this.#selectedAreaPosition.verticleCenter, left: '50%' }],
@@ -452,13 +454,9 @@ class TaroCard {
 
                 if (this.selectedList.length > 1) {
                     const length = this.selectedList.length;
-                    // con(length)
-                    // con(this.selectedList)
                     //이미 내려진 카드 옮기기
                     this.#selcetedList.some((item, idx) => {
                         const position = selectedCardPositionList[length - 1][idx];
-                        // con(item.dom)
-                        // con(position.left)
                         item.dom.animate([
                             {
                                 top: position.top + 'px',
@@ -509,7 +507,7 @@ class TaroCard {
                 item.dom.classList.replace('clicked', 'unClick');
                 return;
             }
-            //------------------ ** 가끔 씹히는듯.... ------------------------------//
+            //------------------ *** 가끔 씹히는듯.... ------------------------------//
 
             //반대로 뒤집기  front->앞 back->뒤
             item.dom.querySelector('img.front').animate({
