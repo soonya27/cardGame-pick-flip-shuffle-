@@ -6,6 +6,10 @@ const coverIgmUrl = '/cover.png';
 
 /**
  * TaroCard
+ * constructor(cardObj, maxCnt)
+ * @param {object[{id,imgUrl,title}...]} cardObj
+ * @param {number} maxCnt : 선택가능한 카드  (최대 5)
+ * 
  * method
  * - reset() : void
  * - shuffle() : void
@@ -18,6 +22,7 @@ const coverIgmUrl = '/cover.png';
 class TaroCard {
     #MAXCARDS_NUM;
     #CARD_ROW_GAP;
+    #MAX_SELCET_CNT;
     #field;
     #cardField;
     #cardList;
@@ -27,12 +32,20 @@ class TaroCard {
     #cardHeight;
     #selectedAreaPosition;
     #animation;
-    constructor(cardObj) {
+    #selcetedList;
+    constructor(cardObj, maxCnt) {
         this.#MAXCARDS_NUM = 12; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
+        if (maxCnt > 5) {
+            con('최대 선택가능한 카드는 5개입니다.');
+            this.#MAX_SELCET_CNT = 5;
+        } else {
+            this.#MAX_SELCET_CNT = maxCnt;
+        }
         this.#field = document.querySelector('.card-wrap');
         this.#cardField = document.querySelector('.card-select-wrap');
         this.#cardList = [];
+        this.#selcetedList = [];
         this.#animation = {};
         this.#selectedAreaPosition = {}
         window.addEventListener('resize', () => {
@@ -63,8 +76,8 @@ class TaroCard {
     }
 
     /**
-   * 카드를 섞음 -> rerender하지 않고 cardList를 update 함 
-   */
+    * 카드를 섞음 -> rerender하지 않고 cardList를 update 함 
+    */
     shuffle() {
         //class삭제
         this.#cardField.querySelector('ul').classList.remove('clickable');
@@ -100,9 +113,12 @@ class TaroCard {
     }
 
     get selectedList() {
-        const selectedLiList = Array.from(this.#cardField.querySelectorAll('li.clicked'));
-        this.selcetedList = this.#cardList.filter(item => selectedLiList.includes(item.dom));
-        return this.selcetedList;
+        // const selectedLiList = Array.from(this.#cardField.querySelectorAll('li.clicked'));
+        // this.selcetedList = this.#cardList.filter(item => selectedLiList.includes(item.dom));
+        // return this.selcetedList;
+        //-> li로 가져오니까 선택된 순서대로 가져오지 못함..
+
+        return this.#selcetedList;
     }
 
     #render() {
@@ -129,6 +145,7 @@ class TaroCard {
                     return;
                 }
                 e.target.parentNode.classList.replace('unClick', 'clicked');
+                this.#selcetedList.push(this.#cardList.find(item => item.dom == e.target.parentNode));
                 this.#clickAnimation(e);
             });
         });
@@ -174,6 +191,7 @@ class TaroCard {
         this.#cardList.sort(() => Math.random() - 0.5);
         this.#cardListTop = Array.from(this.#cardList).slice(0, this.#MAXCARDS_NUM);
         this.#cardListBottom = Array.from(this.#cardList).slice(this.#MAXCARDS_NUM);
+        this.#selcetedList = [];
     }
 
     /**
@@ -414,17 +432,43 @@ class TaroCard {
                 },
                     { duration: 600, fill: "forwards" });
 
+                // con(this.selectedList)
                 //하단영역 중앙정렬
                 const selectedCardPositionList = [
                     [{ top: this.#selectedAreaPosition.verticleCenter, left: '50%' }],
-                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '60%' }],
-                    [{ top: 0, left: 0 }, { top: 0, left: 0 }, { top: 0, left: 0 }],
-                    [{ top: 0, left: 0 }, { top: 0, left: 0 }, { top: 0, left: 0 }, { top: 0, left: 0 }]
+                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '60%' }],
+                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '50%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '70%' }],
+                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '20%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '60%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '80%' }],
+                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '10%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '50%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '70%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '90%' }],
                 ];
+                const position = selectedCardPositionList[this.selectedList.length - 1][selectedCardPositionList[this.selectedList.length - 1].length - 1]
+
+                if (this.selectedList.length > 1) {
+                    const length = this.selectedList.length;
+                    // con(length)
+                    // con(this.selectedList)
+                    //이미 내려진 카드 옮기기
+                    this.#selcetedList.some((item, idx) => {
+                        const position = selectedCardPositionList[length - 1][idx];
+                        // con(item.dom)
+                        // con(position.left)
+                        item.dom.animate([
+                            {
+                                top: position.top + 'px',
+                                left: position.left,
+                                transform: 'translate(-50%, -50%)',
+                                zIndex: 1
+                            },
+                        ],
+                            { duration: 600, delay: 1200, fill: "forwards" });
+                        //방금 선택된것 제외
+                        return idx + 1 == length - 1;
+                    })
+                }
                 this.#animation.click = target.animate([
                     {
-                        top: this.#selectedAreaPosition.verticleCenter + 'px',
-                        left: '50%',
+                        top: position.top + 'px',
+                        left: position.left,
                         transform: 'translate(-50%, -50%)',
                         zIndex: 1
                     },
@@ -433,6 +477,10 @@ class TaroCard {
 
 
                 this.#animation.click.onfinish = () => {
+                    //모두 선택됐으면 click막기
+                    if (this.selectedList.length == this.#MAX_SELCET_CNT) {
+                        return;
+                    }
                     e.target.closest('ul').classList.add('clickable');
                 }
             }
