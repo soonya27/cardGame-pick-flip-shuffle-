@@ -1,8 +1,8 @@
 'use strict';
 let con = console.log;
-const coverIgmUrl = '/cover.png';
-const clickSound = new Audio('/crash.mp3');
-const spreadSound = new Audio('/spread.mp3');
+const coverIgmUrl = './cover.png';
+const clickSound = new Audio('./crash.mp3');
+const spreadSound = new Audio('./spread.mp3');
 
 
 //     수정중 *** 검색
