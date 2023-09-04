@@ -75,6 +75,12 @@ class TaroCard {
         }
     }
 
+    get selectedList() {
+        const selectedLiList = Array.from(this.cardField.querySelectorAll('li.clicked'));
+        this.selcetedList = this.cardList.filter(item => selectedLiList.includes(item.dom));
+        return this.selcetedList;
+    }
+
     #render() {
         this.cardField.innerHTML = '';
         const cardUl = document.createElement('ul');
@@ -329,11 +335,6 @@ class TaroCard {
         }
         return result;
     }
-
-    //animation
-    //1. reset -> spread
-    //2. shuffle
-    //3. shuffle -> spread
 
 
 
