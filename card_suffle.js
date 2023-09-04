@@ -1,6 +1,9 @@
 'use strict';
 let con = console.log;
 const coverIgmUrl = '/cover.png';
+const clickSound = new Audio('/crash.mp3');
+const spreadSound = new Audio('/spread.mp3');
+
 
 //     수정중 *** 검색
 
@@ -77,6 +80,7 @@ class TaroCard {
         this.#cardList.forEach(item => {
             item.dom.style.left = resetPosition;
         });
+        setTimeout(playSound(spreadSound), 2000)
     }
 
     /**
@@ -150,6 +154,7 @@ class TaroCard {
                 }
                 e.target.parentNode.classList.replace('unClick', 'clicked');
                 this.#selcetedList.push(this.#cardList.find(item => item.dom == e.target.parentNode));
+                playSound(clickSound);
                 this.#clickAnimation(e);
             });
         });
@@ -223,7 +228,6 @@ class TaroCard {
             item.dom.animate([
                 { left: this.#calculateLeftPosition(this.#cardListTop, idx) }],
                 { duration: topTimeForAnimation, fill: "forwards", delay });
-            // con(idx)
         });
 
         this.#cardListBottom.forEach((item, idx) => {
@@ -519,12 +523,18 @@ class TaroCard {
             },
                 { duration: 600, delay: 1, fill: "forwards" });
             item.dom.classList.replace('clicked', 'unClick');
-
         });
-
     }
 
 
+}
+
+
+
+function playSound(sound) {
+    sound.muted = true;
+    sound.play();
+    sound.muted = false;
 }
 
 
