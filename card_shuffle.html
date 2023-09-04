@@ -104,7 +104,6 @@
 
 
     <script>
-        const taroCard = new TaroCard();
         const cardDataList = [{ id: 1, imgUrl: 'https://picsum.photos/id/101/120/186', title: 'taro01' },
         { id: 2, imgUrl: 'https://picsum.photos/id/102/120/186', title: 'taro02' },
         { id: 3, imgUrl: 'https://picsum.photos/id/103/120/186', title: 'taro03' },
@@ -130,8 +129,8 @@
         { id: 23, imgUrl: 'https://picsum.photos/id/123/120/186', title: 'taro23' },
         { id: 24, imgUrl: 'https://picsum.photos/id/124/120/186', title: 'taro24' },
         ];
-        taroCard.init(cardDataList);
 
+        const taroCard = new TaroCard(cardDataList);
 
         function reset() {
             taroCard.reset();
