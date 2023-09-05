@@ -6,6 +6,7 @@ audioObj.clickSound = new Audio('./sounds/crash.mp3');
 audioObj.spreadSound = new Audio('./sounds/spread.mp3');
 audioObj.filpSound = new Audio('./sounds/flipcard.mp3');
 audioObj.shuffleSound = new Audio('./sounds/shuffle.mp3');
+audioObj.positionSound = new Audio('./sounds/shuffleSpread.mp3');
 
 
 //     수정중 *** 검색
@@ -224,6 +225,7 @@ class TaroCard {
         //spread sound
         const soundDelay = 600;
         this.#audioTimeout = setTimeout(() => {
+            audioObj.spreadSound.volume = 1;
             playSound(audioObj.spreadSound);
         }, soundDelay);
         this.#audioTimeout = setTimeout(() => {
@@ -281,6 +283,7 @@ class TaroCard {
         //shuffleSound
         this.#audioTimeout = setTimeout(() => {
             this.#stopSounds();
+            audioObj.shuffleSound.volume = 1;
             playSound(audioObj.shuffleSound);
         }, 100);
 
@@ -331,6 +334,7 @@ class TaroCard {
             //spread sound
             this.#stopSounds();
             this.#audioTimeout = setTimeout(function () {
+                audioObj.spreadSound.volume = 0.6;
                 playSound(audioObj.spreadSound);
             }, 300);
             this.#audioTimeout = setTimeout(function () {
@@ -515,6 +519,13 @@ class TaroCard {
                     },
                 ],
                     { duration: flipBackTimeForAnimation, delay: flipBackTimeForAnimation * 2, fill: "forwards" });
+                //positionSound
+                this.#audioTimeout = setTimeout(() => {
+                    this.#stopSounds();
+                    audioObj.positionSound.volume = 0.6;
+                    playSound(audioObj.positionSound);
+                }, flipBackTimeForAnimation * 2 + flipBackTimeForAnimation - 200);
+
 
                 this.#animation.click.onfinish = () => {
                     //모두 선택됐으면 click막기
