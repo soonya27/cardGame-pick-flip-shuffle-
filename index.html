@@ -23,9 +23,16 @@
             <!-- <div class="seleted-wrap">
             </div> -->
         </div>
+
+        <!-- pop -->
+        <div class="pop-start">
+            <button class="btn-play" id="btnPlay">PLAY</button>
+        </div>
     </div>
-    <button onclick="reset()">카드 초기화</button>
-    <button onclick="shuffleCards()">카드 섞기</button>
+    <div class="btn-wrap" style="display: none;">
+        <button onclick="reset()">카드 초기화</button>
+        <button onclick="shuffleCards()">카드 섞기</button>
+    </div>
     <!-- <button onclick="sufflelikeline2()">카드라인(호선)</button> -->
     <!-- <button onclick="sufflelikecircle()">카드원형섞기</button> -->
     <script src="card_suffle.js"></script>
@@ -59,7 +66,14 @@
         ];
 
         const taroCard = new TaroCard(cardDataList, 5);
-        document.querySelector('#maxNums').innerHTML = taroCard.maxSelectCount;
+
+        //sound -> 시작필요
+        document.querySelector('#btnPlay').addEventListener('click', (e) => {
+            taroCard.init();
+            document.querySelector('#maxNums').innerHTML = taroCard.maxSelectCount;
+            document.querySelector('.btn-wrap').style.display = 'block';
+            e.target.parentNode.classList.add('hide');
+        });
 
         function reset() {
             taroCard.reset();

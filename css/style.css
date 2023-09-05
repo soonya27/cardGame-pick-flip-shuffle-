@@ -80,3 +80,27 @@ button {
 /* .selected-wrap {
     border: 1px solid #000;
 } */
+
+.pop-start {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+    min-height: 50vh;
+    background-color: #ffffff73;
+}
+
+.pop-start.hide {
+    display: none;
+}
+
+.pop-start .btn-play {
+    padding: 4vw 6vw;
+    font-weight: 600;
+    font-size: 6vw;
+    background: #fff;
+}

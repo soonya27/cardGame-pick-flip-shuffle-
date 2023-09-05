@@ -56,15 +56,14 @@ class TaroCard {
         this.#selcetedList = [];
         this.#animation = {};
         this.#selectedAreaPosition = {}
+        this.#cardCount = cardObj.length;
+        cardObj.map(item => this.#cardList.push({ data: item }));
         window.addEventListener('resize', () => {
             this.reset();
         });
-        this.#cardCount = cardObj.length;
-        this.#init(cardObj);
     }
 
-    #init(cardObj) {
-        cardObj.map(item => this.#cardList.push({ data: item }));
+    init() {
         this.#randomList();
         this.#render();
     }
