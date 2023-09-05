@@ -1,9 +1,10 @@
 'use strict';
 let con = console.log;
 const coverIgmUrl = './cover.png';
-const clickSound = new Audio('./crash.mp3');
-const spreadSound = new Audio('./spread.mp3');
-const filpSound = new Audio('./flipcard.mp3');
+const audioObj = {}
+audioObj.clickSound = new Audio('./sounds/crash.mp3');
+audioObj.spreadSound = new Audio('./sounds/spread.mp3');
+audioObj.filpSound = new Audio('./sounds/flipcard.mp3');
 
 
 //     수정중 *** 검색
@@ -40,6 +41,7 @@ class TaroCard {
     #selectedAreaPosition;
     #animation;
     #selcetedList;
+    #audioTimeout;
     constructor(cardObj, maxCnt) {
         this.#MAX_CARDS_IN_ONE_LINE = 12; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
@@ -79,7 +81,6 @@ class TaroCard {
         this.#cardList.forEach(item => {
             item.dom.style.left = resetPosition;
         });
-        // setTimeout(playSound(spreadSound), 2000);
     }
 
     /**
@@ -153,7 +154,7 @@ class TaroCard {
                 }
                 e.target.parentNode.classList.replace('unClick', 'clicked');
                 this.#selcetedList.push(this.#cardList.find(item => item.dom == e.target.parentNode));
-                playSound(clickSound);
+                playSound(audioObj.clickSound);
                 this.#clickAnimation(e);
             });
         });
@@ -218,6 +219,13 @@ class TaroCard {
      */
     #spread() {
         this.#stopAnimation();
+
+        this.#audioTimeout = setTimeout(function () {
+            playSound(audioObj.spreadSound);
+        }, 500);
+        this.#audioTimeout = setTimeout(function () {
+            playSound(audioObj.spreadSound);
+        }, 1300);
 
         //카드 펼치기
         const topTimeForAnimation = 700;
@@ -371,7 +379,6 @@ class TaroCard {
 
     #stopAnimation(...except) {
         for (let key in this.#animation) {
-
             if (except.some(item => item == key)) {
                 continue;
             }
@@ -379,6 +386,15 @@ class TaroCard {
                 this.#animation[key].pause();
                 // console.log('애니메이션 멈춤')
             }
+        }
+        this.#stopSounds();
+    }
+
+    #stopSounds() {
+        for (let key in audioObj) {
+            stopSound(audioObj[key]);
+            //setTimeout걸어둔 audio clear
+            clearTimeout(this.#audioTimeout);
         }
     }
 
@@ -391,18 +407,17 @@ class TaroCard {
     }
 
     #clickAnimation(e) {
-        const target = e.target.parentNode;
-        // target.classList.replace('unClick', 'clicked');
+        const target = e.target.parentNode; //li
 
         //서버이미지 임시------------ 이미지 로딩추가 ....
         const img = new Image();
         img.src = './cover.png';
         img.onload = () => {
 
-            const back = document.createElement('img');
+            const backImg = document.createElement('img');
             const imgUrl = this.#cardList.find(item => item.data.id == target.getAttribute('data-id')).data.imgUrl;
-            back.classList.add('back');
-            back.setAttribute('src', imgUrl);
+            backImg.classList.add('back');
+            backImg.setAttribute('src', imgUrl);
 
             //뽑는 motion
             this.#animation.click = e.target.parentNode.animate([
@@ -417,11 +432,11 @@ class TaroCard {
             //뽑히는동안은 다른카드 pick막기
             e.target.closest('ul').classList.remove('clickable');
 
-            //정중앙에서 flip  
-            setTimeout(function () {
-                playSound(filpSound);
+            //정중앙에서 flip 
+            //filpSound
+            this.#audioTimeout = setTimeout(function () {
+                playSound(audioObj.filpSound);
             }, 1700);
-
             this.#animation.click = target.animate([
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 0 },
@@ -432,8 +447,8 @@ class TaroCard {
             //back 뒷면카드 요소 추가
             this.#animation.click.onfinish = () => {
 
-                back.style.transform = 'rotateY(180deg)';
-                target.appendChild(back);
+                backImg.style.transform = 'rotateY(180deg)';
+                target.appendChild(backImg);
 
                 //front 뒤집기
                 this.#animation.click = target.querySelector('img.front').animate({
@@ -441,7 +456,7 @@ class TaroCard {
                 },
                     { duration: 600, fill: "forwards" });
 
-                this.#animation.click = back.animate({
+                this.#animation.click = backImg.animate({
                     transform: 'rotateY( 0deg )',
                 },
                     { duration: 600, fill: "forwards" });
@@ -532,9 +547,10 @@ class TaroCard {
 
 
 function playSound(sound) {
-    sound.muted = true;
     sound.play();
-    sound.muted = false;
+}
+function stopSound(sound) {
+    sound.pause();
 }
 
 
