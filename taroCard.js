@@ -91,7 +91,6 @@ class TaroCard {
         //class삭제
         this.#field.querySelector('ul').classList.remove('clickable');
 
-        //shuffle, spread, click중일수있음
         //click중이거나 클릭된게 있을때
         if (this.#animation?.click?.playState == 'running' ||
             this.#field.querySelectorAll('li.clicked').length != 0) {
@@ -223,12 +222,14 @@ class TaroCard {
         this.#stopSounds();
 
         //spread sound
-        this.#audioTimeout = setTimeout(function () {
+        const soundDelay = 600;
+        this.#audioTimeout = setTimeout(() => {
             playSound(audioObj.spreadSound);
-        }, 500);
-        this.#audioTimeout = setTimeout(function () {
+        }, soundDelay);
+        this.#audioTimeout = setTimeout(() => {
+            this.#stopSounds();
             playSound(audioObj.spreadSound);
-        }, 1300);
+        }, soundDelay * 2);
 
         //카드 펼치기
         const topTimeForAnimation = 700;
@@ -278,7 +279,8 @@ class TaroCard {
         this.#stopAnimation();
         this.#stopSounds();
         //shuffleSound
-        this.#audioTimeout = setTimeout(function () {
+        this.#audioTimeout = setTimeout(() => {
+            this.#stopSounds();
             playSound(audioObj.shuffleSound);
         }, 100);
 
@@ -287,7 +289,7 @@ class TaroCard {
         this.#cardListTop.forEach((item, idx) => {
             //가운데 위치
             item.dom.animate([{ top: top + 'vw', left: '50%', transform: 'translateX(-50%)' },],
-                { duration: 200, fill: "forwards" });
+                { duration: topTimeForAnimation / this.#cardListTop.length, fill: "forwards" });
 
             //섞는 motion
             const delay = topTimeForAnimation / this.#cardListTop.length * idx;
@@ -303,7 +305,7 @@ class TaroCard {
         this.#cardListBottom.forEach((item, idx) => {
             //가운데 위치
             item.dom.animate([{ top: top + 'vw', left: '50%', transform: 'translateX(-50%)' },],
-                { duration: 200, fill: "forwards" });
+                { duration: topTimeForAnimation / this.#cardListBottom.length, fill: "forwards" });
 
             //섞는 motion
             const delay = topTimeForAnimation / this.#cardListBottom.length * idx;
@@ -352,7 +354,7 @@ class TaroCard {
             this.#cardListBottom.forEach((item, idx) => {
                 //top
                 const topVw = this.#calculateVw(this.#cardHeight + this.#CARD_ROW_GAP) + 'vw';
-
+                const lastSpreadDelay = 400;
                 //윗줄과 함께 이동
                 item.dom.animate([
                     { left: 0, top: 0 }, { left: rightPosition, top: 0 },],
@@ -360,10 +362,10 @@ class TaroCard {
                 //아래줄로 이동
                 item.dom.animate([
                     { left: rightPosition, top: 0 }, { left: 0, top: topVw },],
-                    { duration: 400, fill: "forwards", delay: topDelay + topTimeForAnimation });
+                    { duration: lastSpreadDelay, fill: "forwards", delay: topDelay + topTimeForAnimation });
                 //펼쳐지기
                 this.#animation.shuffleSpread = item.dom.animate([{ top: topVw, left: this.#calculateLeftPosition(this.#cardListBottom, idx) },],
-                    { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + 400 });
+                    { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + lastSpreadDelay });
             });
 
             if (!this.#animation.shuffleSpread) return;
@@ -431,46 +433,50 @@ class TaroCard {
             backImg.setAttribute('src', imgUrl);
 
             //뽑는 motion
+            const clickTimeForAnimation = 600;
+            const clickDelayForAnimation = 300;
             this.#animation.click = e.target.parentNode.animate([
                 { transform: 'translateY(-35%)' },
             ],
-                { duration: 600, fill: "forwards" });
+                { duration: clickTimeForAnimation, fill: "forwards" });
             this.#animation.click = e.target.parentNode.animate([
                 { opacity: 0 },
             ],
-                { duration: 600, delay: 300, fill: "forwards" });
+                { duration: clickTimeForAnimation, delay: clickDelayForAnimation, fill: "forwards" });
 
             //뽑히는동안은 다른카드 pick막기
             e.target.closest('ul').classList.remove('clickable');
 
             //정중앙에서 flip 
-            //filpSound
-            this.#audioTimeout = setTimeout(function () {
-                playSound(audioObj.filpSound);
-            }, 1700);
+            const flipTimeForAnimation = 1200;
             this.#animation.click = target.animate([
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 0 },
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 1, zIndex: 9999 },
             ],
-                { duration: 1200, delay: 900, fill: "forwards" });
+                { duration: flipTimeForAnimation, delay: clickTimeForAnimation + clickDelayForAnimation, fill: "forwards" });
+            //filpSound
+            this.#audioTimeout = setTimeout(function () {
+                playSound(audioObj.filpSound);
+                // 정중앙에서 flip 애니메이션의 delay                +  flip 애니메이션 duration의 2번째 단계에서 sound시작
+            }, (clickTimeForAnimation + clickDelayForAnimation) + flipTimeForAnimation / 3 * 2);
 
             //back 뒷면카드 요소 추가
             this.#animation.click.onfinish = () => {
-
                 backImg.style.transform = 'rotateY(180deg)';
                 target.appendChild(backImg);
 
                 //front 뒤집기
+                const flipBackTimeForAnimation = 600;
                 this.#animation.click = target.querySelector('img.front').animate({
                     transform: 'rotateY( 180deg )',
                 },
-                    { duration: 600, fill: "forwards" });
+                    { duration: flipBackTimeForAnimation, fill: "forwards" });
 
                 this.#animation.click = backImg.animate({
                     transform: 'rotateY( 0deg )',
                 },
-                    { duration: 600, fill: "forwards" });
+                    { duration: flipBackTimeForAnimation, fill: "forwards" });
 
                 //하단영역 중앙정렬
                 const selectedCardPositionList = [
@@ -495,7 +501,7 @@ class TaroCard {
                                 zIndex: 1
                             },
                         ],
-                            { duration: 600, delay: 1200, fill: "forwards" });
+                            { duration: flipBackTimeForAnimation, delay: flipBackTimeForAnimation * 2, fill: "forwards" });
                         //방금 선택된것 제외
                         return idx + 1 == length - 1;
                     })
@@ -508,7 +514,7 @@ class TaroCard {
                         zIndex: 1
                     },
                 ],
-                    { duration: 600, delay: 1200, fill: "forwards" });
+                    { duration: flipBackTimeForAnimation, delay: flipBackTimeForAnimation * 2, fill: "forwards" });
 
                 this.#animation.click.onfinish = () => {
                     //모두 선택됐으면 click막기
@@ -539,14 +545,15 @@ class TaroCard {
             //------------------ *** 가끔 씹히는듯.... ------------------------------//
 
             //반대로 뒤집기  front->앞 back->뒤
+            const flipBackTimeForAnimation = 600;
             item.dom.querySelector('img.front').animate({
                 transform: 'rotateY(0deg)',
             },
-                { duration: 600, delay: 1, fill: "forwards" });
+                { duration: flipBackTimeForAnimation, delay: 1, fill: "forwards" });
             this.#animation.flipBack = item.dom.querySelector('img.back').animate({
                 transform: 'rotateY( 180deg )',
             },
-                { duration: 600, delay: 1, fill: "forwards" });
+                { duration: flipBackTimeForAnimation, delay: 1, fill: "forwards" });
             item.dom.classList.replace('clicked', 'unClick');
         });
     }
