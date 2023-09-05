@@ -25,12 +25,11 @@ const spreadSound = new Audio('./spread.mp3');
  * - selectedList {Array [{data:{id,imgUrl,title}, dom :li }...]} : 선택된 카드 객체 리스트
  */
 class TaroCard {
-    #MAXCARDS_NUM;
+    #MAX_CARDS_IN_ONE_LINE;
     #CARD_ROW_GAP;
     #MAX_SELECET_CNT;
     #field;
-    #cardField;
-    #cardFieldWidth;
+    #fieldWidth;
     #cardList;
     #cardListTop;
     #cardListBottom;
@@ -41,7 +40,7 @@ class TaroCard {
     #animation;
     #selcetedList;
     constructor(cardObj, maxCnt) {
-        this.#MAXCARDS_NUM = 12; //한줄 최대 카드갯수
+        this.#MAX_CARDS_IN_ONE_LINE = 12; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
         if (maxCnt > 5) {
             con('최대 선택가능한 카드는 5개입니다.');
@@ -50,7 +49,6 @@ class TaroCard {
             this.#MAX_SELECET_CNT = maxCnt;
         }
         this.#field = document.querySelector('.card-wrap');
-        this.#cardField = document.querySelector('.card-select-wrap');
         this.#cardList = [];
         this.#selcetedList = [];
         this.#animation = {};
@@ -88,17 +86,17 @@ class TaroCard {
     */
     shuffle() {
         //class삭제
-        this.#cardField.querySelector('ul').classList.remove('clickable');
+        this.#field.querySelector('ul').classList.remove('clickable');
 
         //shuffle, spread, click중일수있음
         //click중이거나 클릭된게 있을때
         if (this.#animation?.click?.playState == 'running' ||
-            this.#cardField.querySelectorAll('li.clicked').length != 0) {
+            this.#field.querySelectorAll('li.clicked').length != 0) {
             this.#stopAnimation();
             this.#resetCardState();
             if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
                 this.#animation.flipBack.onfinish = () => {
-                    this.#cardField.querySelectorAll('li img.back').forEach(item => {
+                    this.#field.querySelectorAll('li img.back').forEach(item => {
                         item.remove();
                     });
                     this.#playShuffleAnimation();
@@ -130,9 +128,9 @@ class TaroCard {
     }
 
     #render() {
-        this.#cardField.innerHTML = '';
+        this.#field.innerHTML = '';
         const cardUl = document.createElement('ul');
-        this.#cardField.appendChild(cardUl);
+        this.#field.appendChild(cardUl);
         this.#cardList.forEach((item, idx) => {
             const cardLi = document.createElement('li');
             cardLi.classList.add('unClick');
@@ -164,15 +162,15 @@ class TaroCard {
         coverImg.src = coverIgmUrl;
         coverImg.onload = () => {
             //img높이값
-            this.#cardHeight = document.querySelector('.card-select-wrap li img').offsetHeight;
-            this.#cardWidth = document.querySelector('.card-select-wrap li img').offsetWidth;
+            this.#cardHeight = this.#field.querySelector('li img').offsetHeight;
+            this.#cardWidth = this.#field.querySelector('li img').offsetWidth;
 
-            this.#cardFieldWidth = this.#field.clientWidth -
+            this.#fieldWidth = this.#field.clientWidth -
                 (parseInt(window.getComputedStyle(this.#field).paddingLeft) +
                     parseInt(window.getComputedStyle(this.#field).paddingRight));
 
             //li높이값 수동으로지정 -> 안의 img가 position:absolute이기때문에
-            this.#cardField.querySelectorAll('li').forEach((item, idx) => {
+            this.#field.querySelectorAll('li').forEach((item, idx) => {
                 item.style.height = this.#cardHeight + 'px';
             });
 
@@ -189,8 +187,8 @@ class TaroCard {
 
             //------------------ *** 카드 펼쳐질 영역 ui  bgimg 위치 css ...... ------------------------------//
             //(this.#selectedAreaPosition)카드 펼쳐질 영역 ui
-            // this.#cardField.style.background = `url(/card01.png) no-repeat 50% ${this.#selectedAreaPosition.top}px`;
-            // this.#cardField.style.backgroundSize = `cover`;
+            // this.#field.style.background = `url(/card01.png) no-repeat 50% ${this.#selectedAreaPosition.top}px`;
+            // this.#field.style.backgroundSize = `cover`;
 
             this.#spread();
         };
@@ -200,7 +198,7 @@ class TaroCard {
      * 현재생성돼있는 dom 요소의 데이터를 this.#cardList에 업데이트
      */
     #updateList() {
-        this.#cardField.querySelectorAll('li').forEach((item, idx) => {
+        this.#field.querySelectorAll('li').forEach((item, idx) => {
             item.setAttribute('data-id', '');
             item.setAttribute('data-id', this.#cardList[idx].data.id);
             this.#cardList[idx].dom = item;
@@ -209,8 +207,8 @@ class TaroCard {
 
     #randomList() {
         this.#cardList.sort(() => Math.random() - 0.5);
-        this.#cardListTop = Array.from(this.#cardList).slice(0, this.#MAXCARDS_NUM);
-        this.#cardListBottom = Array.from(this.#cardList).slice(this.#MAXCARDS_NUM);
+        this.#cardListTop = Array.from(this.#cardList).slice(0, this.#MAX_CARDS_IN_ONE_LINE);
+        this.#cardListBottom = Array.from(this.#cardList).slice(this.#MAX_CARDS_IN_ONE_LINE);
         this.#selcetedList = [];
     }
 
@@ -245,7 +243,7 @@ class TaroCard {
         if (!this.#animation.spread) return;
         this.#animation.spread.onfinish = () => {
             // class추가
-            this.#cardField.querySelector('ul').classList.add('clickable');
+            this.#field.querySelector('ul').classList.add('clickable');
         }
     }
 
@@ -350,7 +348,7 @@ class TaroCard {
             if (!this.#animation.shuffleSpread) return;
             this.#animation.shuffleSpread.onfinish = () => {
                 //펼쳐진후 클릭가능(class 추가)
-                this.#cardField.querySelector('ul').classList.add('clickable');
+                this.#field.querySelector('ul').classList.add('clickable');
             }
         }
     }
@@ -366,7 +364,7 @@ class TaroCard {
      * @returns {string} 
      */
     #calculateLeftPosition(cardList, idx) {
-        let leftPx = ((this.#cardFieldWidth - this.#cardWidth) / (this.#cardListTop.length - 1));
+        let leftPx = ((this.#fieldWidth - this.#cardWidth) / (cardList.length - 1));
         return Math.ceil(leftPx * idx) + 'px';
     }
 
