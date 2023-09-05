@@ -127,6 +127,9 @@ class TaroCard {
                 // this.#animation.flipBack이 무조건 있음
                 this.#animation.flipBack.onfinish = () => {
                     con('flipback 끝난뒤');
+                    this.#field.querySelectorAll('li img.back').forEach(item => {
+                        item.remove();
+                    });
                     this.#animateshuffle();
                 }
             }
@@ -572,15 +575,15 @@ class TaroCard {
     #resetCardState() {
         // con(this.selectedList)
         this.selectedList.forEach((item, idx) => {
-            con(item);
-            //style 되돌리기
-            item.dom.animate({
-                opacity: 100
-            },
-                { duration: 100, fill: "forwards" });
+            // con(item);
 
             if (item.dom.querySelector('img.back') == null) {
+                //style 되돌리기
                 con('img없음');
+                item.dom.animate({
+                    opacity: 1
+                },
+                    { duration: 100, fill: "forwards" });
                 item.dom.classList.replace('clicked', 'unClick');
                 return;
             }
@@ -588,15 +591,16 @@ class TaroCard {
             con('img가 잇음 있는 애들만 flipback 걸어줌');
             //반대로 뒤집기  front->앞 back->뒤
             const flipBackTimeForAnimation = 600;
-            item.dom.querySelector('img.front').animate({
+            const delay = flipBackTimeForAnimation / this.selectedList.length * idx
+            this.#animation.flipBack = item.dom.querySelector('img.front').animate({
                 transform: 'rotateY(0deg)',
             },
-                { duration: flipBackTimeForAnimation, delay: 100, fill: "forwards" });
+                { duration: flipBackTimeForAnimation, delay: delay, fill: "forwards" });
 
             this.#animation.flipBack = item.dom.querySelector('img.back').animate({
                 transform: 'rotateY( 180deg )',
             },
-                { duration: flipBackTimeForAnimation, delay: 100, fill: "forwards" });
+                { duration: flipBackTimeForAnimation, delay: delay, fill: "forwards" });
 
 
             item.dom.classList.replace('clicked', 'unClick');
