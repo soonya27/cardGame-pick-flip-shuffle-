@@ -23,10 +23,10 @@ audioObj.shuffleSound = new Audio('./sounds/shuffle.mp3');
  * - shuffle() : 카드 섞기
  * 
  * property
- * - cardCount {number} : 전체 카드 수
- * - maxSelectCount {number} : 선택가능한 카드 수
- * - cardList {Array[{data:{id,imgUrl,title}, dom :li }...]} : 카드 객체 리스트
- * - selectedList {Array [{data:{id,imgUrl,title}, dom :li }...]} : 선택된 카드 객체 리스트
+ * - cardCount :number - 전체 카드 수
+ * - maxSelectCount :number - 선택가능한 카드 수
+ * - cardList :[{data:{id,imgUrl,title}, dom :li }...] - 카드 객체 리스트
+ * - selectedList :[{data:{id,imgUrl,title}, dom :li }...] - 선택된 카드 객체 리스트
  */
 class TaroCard {
     #MAX_CARDS_IN_ONE_LINE;
@@ -161,7 +161,6 @@ class TaroCard {
             });
         });
 
-
         const coverImg = new Image();
         coverImg.src = coverIgmUrl;
         coverImg.onload = () => {
@@ -266,7 +265,6 @@ class TaroCard {
             this.#animation.spread.onfinish = () => {
                 this.#animateshuffle();
             }
-
         } else {
             this.#animateshuffle();
         }
@@ -351,7 +349,6 @@ class TaroCard {
                     { duration: topTimeForAnimation, fill: "forwards", delay });
             });
 
-
             this.#cardListBottom.forEach((item, idx) => {
                 //top
                 const topVw = this.#calculateVw(this.#cardHeight + this.#CARD_ROW_GAP) + 'vw';
@@ -367,7 +364,6 @@ class TaroCard {
                 //펼쳐지기
                 this.#animation.shuffleSpread = item.dom.animate([{ top: topVw, left: this.#calculateLeftPosition(this.#cardListBottom, idx) },],
                     { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + 400 });
-
             });
 
             if (!this.#animation.shuffleSpread) return;
@@ -514,7 +510,6 @@ class TaroCard {
                 ],
                     { duration: 600, delay: 1200, fill: "forwards" });
 
-
                 this.#animation.click.onfinish = () => {
                     //모두 선택됐으면 click막기
                     if (this.selectedList.length == this.#MAX_SELECET_CNT) {
@@ -555,10 +550,7 @@ class TaroCard {
             item.dom.classList.replace('clicked', 'unClick');
         });
     }
-
-
 }
-
 
 
 function playSound(sound) {
