@@ -45,7 +45,7 @@ class TaroCard {
     #selcetedList;
     #audioTimeout;
     constructor(cardObj, maxCnt) {
-        this.#MAX_CARDS_IN_ONE_LINE = 12; //한줄 최대 카드갯수
+        this.#MAX_CARDS_IN_ONE_LINE = 11; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
         if (maxCnt > 5) {
             con('최대 선택가능한 카드는 5개입니다.');
@@ -146,7 +146,7 @@ class TaroCard {
             //cardList dom요소 추가
             this.#cardList[idx].dom = cardLi;
 
-            //clickEvent 새로 render될때만 최초 1번
+            //clickEvent
             cardLi.addEventListener('click', (e) => {
                 if (!e.target.closest('ul').classList.contains('clickable')) {
                     return;
