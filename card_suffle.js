@@ -3,6 +3,7 @@ let con = console.log;
 const coverIgmUrl = './cover.png';
 const clickSound = new Audio('./crash.mp3');
 const spreadSound = new Audio('./spread.mp3');
+const filpSound = new Audio('./flipcard.mp3');
 
 
 //     수정중 *** 검색
@@ -417,6 +418,10 @@ class TaroCard {
             e.target.closest('ul').classList.remove('clickable');
 
             //정중앙에서 flip  
+            setTimeout(function () {
+                playSound(filpSound);
+            }, 1700);
+
             this.#animation.click = target.animate([
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 0 },
