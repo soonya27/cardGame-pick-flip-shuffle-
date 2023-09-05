@@ -279,6 +279,7 @@ class TaroCard {
         //shffle -> 애니메이션 멈춤..
         this.#stopAnimation();
         this.#stopSounds();
+        //shuffleSound
         this.#audioTimeout = setTimeout(function () {
             playSound(audioObj.shuffleSound);
         }, 100);
@@ -561,6 +562,7 @@ class TaroCard {
 
 
 function playSound(sound) {
+    sound.currentTime = 0;
     sound.play();
 }
 function stopSound(sound) {
