@@ -92,26 +92,55 @@ class TaroCard {
         //class삭제
         this.#field.querySelector('ul').classList.remove('clickable');
 
-        //click중이거나 클릭된게 있을때
-        if (this.#animation?.click?.playState == 'running' ||
-            this.#field.querySelectorAll('li.clicked').length != 0) {
-            this.#stopAnimation();
-            this.#stopSounds();
-            this.#resetCardState();
-            if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
-                this.#animation.flipBack.onfinish = () => {
-                    this.#field.querySelectorAll('li img.back').forEach(item => {
-                        item.remove();
-                    });
-                    this.#playShuffleAnimation();
+
+
+        //클릭여부  -> 클릭된게 있고 클릭 애니메이션 진행중일때
+        if (this.selectedList.length != 0) {
+            // con('클릭된게잇음');
+            if (this.#animation.click && this.#animation.click.playState == 'running') {
+                con('click도중 ->');
+                //stop -> backfilp -> img요소 없애고 다시 셔플진행
+                this.#stopAnimation();
+
+                //다시 뒤집기 시행
+                this.#resetCardState();
+                // flipback까지 안갔을경우-> img가 없음
+                if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
+                    con('flipback이 있고 flipback 이 시행중이면 ');
+                    //flipback이 있는경우 -> 끝난뒤에  img 삭제
+                    this.#animation.flipBack.onfinish = () => {
+                        con('img 삭제후 shuffle');
+                        this.#field.querySelectorAll('li img.back').forEach(item => {
+                            item.remove();
+                        });
+                        this.#animateshuffle();
+                    }
+                } else {
+                    con('flipback없음');
+                    this.#animateshuffle();
                 }
+
             } else {
-                //플립백은 있지만 끝났을때
-                this.#playShuffleAnimation();
+                con('click 애니메이션 끝난후 ');
+                con('다시 백플립 후 셔플');
+                this.#resetCardState();
+                // this.#animation.flipBack이 무조건 있음
+                this.#animation.flipBack.onfinish = () => {
+                    con('flipback 끝난뒤');
+                    this.#animateshuffle();
+                }
             }
         } else {
-            this.#resetCardState();
-            this.#playShuffleAnimation();
+            con('spread도중일수도');
+            con('shuffle도중일수도');
+            this.#stopAnimation('spread', 'shuffle');
+            if (this.#animation.spread.playState != 'finished') {
+                this.#animation.spread.onfinish = () => {
+                    this.#animateshuffle();
+                }
+            } else {
+                this.#animateshuffle();
+            }
         }
     }
 
@@ -400,7 +429,7 @@ class TaroCard {
             if (except.some(item => item == key)) {
                 continue;
             }
-            if (this.#animation[key].playState == 'running') {
+            if (this.#animation[key]?.playState == 'running') {
                 this.#animation[key].pause();
                 // console.log('애니메이션 멈춤')
             }
@@ -451,7 +480,7 @@ class TaroCard {
             //뽑히는동안은 다른카드 pick막기
             e.target.closest('ul').classList.remove('clickable');
 
-            //정중앙에서 flip 
+            //정중앙 위치
             const flipTimeForAnimation = 1200;
             this.#animation.click = target.animate([
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
@@ -470,19 +499,18 @@ class TaroCard {
                 backImg.style.transform = 'rotateY(180deg)';
                 target.appendChild(backImg);
 
-                //front 뒤집기
-                const flipBackTimeForAnimation = 600;
+                //flip 뒤집기
+                const flipTimeForAnimation = 600;
                 this.#animation.click = target.querySelector('img.front').animate({
                     transform: 'rotateY( 180deg )',
                 },
-                    { duration: flipBackTimeForAnimation, fill: "forwards" });
-
+                    { duration: flipTimeForAnimation, fill: "forwards" });
                 this.#animation.click = backImg.animate({
                     transform: 'rotateY( 0deg )',
                 },
-                    { duration: flipBackTimeForAnimation, fill: "forwards" });
+                    { duration: flipTimeForAnimation, fill: "forwards" });
 
-                //하단영역 중앙정렬
+                //하단영역 카드 정렬
                 const selectedCardPositionList = [
                     [{ top: this.#selectedAreaPosition.verticleCenter, left: '50%' }],
                     [{ top: this.#selectedAreaPosition.verticleCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '60%' }],
@@ -505,7 +533,7 @@ class TaroCard {
                                 zIndex: 1
                             },
                         ],
-                            { duration: flipBackTimeForAnimation, delay: flipBackTimeForAnimation * 2, fill: "forwards" });
+                            { duration: flipTimeForAnimation, delay: flipTimeForAnimation * 2, fill: "forwards" });
                         //방금 선택된것 제외
                         return idx + 1 == length - 1;
                     })
@@ -518,13 +546,13 @@ class TaroCard {
                         zIndex: 1
                     },
                 ],
-                    { duration: flipBackTimeForAnimation, delay: flipBackTimeForAnimation * 2, fill: "forwards" });
+                    { duration: flipTimeForAnimation, delay: flipTimeForAnimation * 2, fill: "forwards" });
                 //positionSound
                 this.#audioTimeout = setTimeout(() => {
                     this.#stopSounds();
                     audioObj.positionSound.volume = 0.6;
                     playSound(audioObj.positionSound);
-                }, flipBackTimeForAnimation * 2 + flipBackTimeForAnimation - 200);
+                }, flipTimeForAnimation * 2 + flipTimeForAnimation - 200);
 
 
                 this.#animation.click.onfinish = () => {
@@ -542,30 +570,37 @@ class TaroCard {
      * 뒤집어진 카드 reset
      */
     #resetCardState() {
-        this.selectedList.forEach(item => {
+        // con(this.selectedList)
+        this.selectedList.forEach((item, idx) => {
+            con(item);
             //style 되돌리기
             item.dom.animate({
-                opacity: 1
+                opacity: 100
             },
-                { duration: 1, fill: "forwards" });
+                { duration: 100, fill: "forwards" });
 
             if (item.dom.querySelector('img.back') == null) {
+                con('img없음');
                 item.dom.classList.replace('clicked', 'unClick');
                 return;
             }
             //------------------ *** 가끔 씹히는듯.... ------------------------------//
-
+            con('img가 잇음 있는 애들만 flipback 걸어줌');
             //반대로 뒤집기  front->앞 back->뒤
             const flipBackTimeForAnimation = 600;
             item.dom.querySelector('img.front').animate({
                 transform: 'rotateY(0deg)',
             },
-                { duration: flipBackTimeForAnimation, delay: 1, fill: "forwards" });
+                { duration: flipBackTimeForAnimation, delay: 100, fill: "forwards" });
+
             this.#animation.flipBack = item.dom.querySelector('img.back').animate({
                 transform: 'rotateY( 180deg )',
             },
-                { duration: flipBackTimeForAnimation, delay: 1, fill: "forwards" });
+                { duration: flipBackTimeForAnimation, delay: 100, fill: "forwards" });
+
+
             item.dom.classList.replace('clicked', 'unClick');
+
         });
     }
 }
