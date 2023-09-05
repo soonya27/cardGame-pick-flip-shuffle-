@@ -1,6 +1,6 @@
 'use strict';
 let con = console.log;
-const coverIgmUrl = './cover.png';
+const coverIgmUrl = './img/cover.png';
 const audioObj = {}
 audioObj.clickSound = new Audio('./sounds/crash.mp3');
 audioObj.spreadSound = new Audio('./sounds/spread.mp3');
@@ -425,7 +425,7 @@ class TaroCard {
 
         //서버이미지 임시------------ 이미지 로딩추가 ....
         const img = new Image();
-        img.src = './cover.png';
+        img.src = './img/cover.png';
         img.onload = () => {
 
             const backImg = document.createElement('img');
