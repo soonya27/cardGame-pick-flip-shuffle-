@@ -5,6 +5,7 @@ const audioObj = {}
 audioObj.clickSound = new Audio('./sounds/crash.mp3');
 audioObj.spreadSound = new Audio('./sounds/spread.mp3');
 audioObj.filpSound = new Audio('./sounds/flipcard.mp3');
+audioObj.shuffleSound = new Audio('./sounds/shuffle.mp3');
 
 
 //     수정중 *** 검색
@@ -17,8 +18,9 @@ audioObj.filpSound = new Audio('./sounds/flipcard.mp3');
  * @param {number} maxCnt : 선택가능한 카드  (최대 5)
  * 
  * method
- * - reset() : void
- * - shuffle() : void
+ * - init() : 기본 세팅
+ * - reset() : 카드 리셋(라인이 기본)
+ * - shuffle() : 카드 섞기
  * 
  * property
  * - cardCount {number} : 전체 카드 수
@@ -94,6 +96,7 @@ class TaroCard {
         if (this.#animation?.click?.playState == 'running' ||
             this.#field.querySelectorAll('li.clicked').length != 0) {
             this.#stopAnimation();
+            this.#stopSounds();
             this.#resetCardState();
             if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
                 this.#animation.flipBack.onfinish = () => {
@@ -218,7 +221,9 @@ class TaroCard {
      */
     #spread() {
         this.#stopAnimation();
+        this.#stopSounds();
 
+        //spread sound
         this.#audioTimeout = setTimeout(function () {
             playSound(audioObj.spreadSound);
         }, 500);
@@ -257,7 +262,6 @@ class TaroCard {
 
     #playShuffleAnimation() {
         this.#stopAnimation('spread', 'shuffle');
-
         if (this.#animation.spread.playState != 'finished') {
             this.#animation.spread.onfinish = () => {
                 this.#animateshuffle();
@@ -274,6 +278,10 @@ class TaroCard {
 
         //shffle -> 애니메이션 멈춤..
         this.#stopAnimation();
+        this.#stopSounds();
+        this.#audioTimeout = setTimeout(function () {
+            playSound(audioObj.shuffleSound);
+        }, 100);
 
         const top = this.#calculateVw(this.#cardHeight + this.#CARD_ROW_GAP) / 2;
         const topTimeForAnimation = 1300;
@@ -319,6 +327,14 @@ class TaroCard {
                 item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }],
                     { duration: 300, fill: 'forwards' })
             });
+            //spread sound
+            this.#stopSounds();
+            this.#audioTimeout = setTimeout(function () {
+                playSound(audioObj.spreadSound);
+            }, 300);
+            this.#audioTimeout = setTimeout(function () {
+                playSound(audioObj.spreadSound);
+            }, 1300);
 
             const topTimeForAnimation = 500;
             let rightPosition = 0;
@@ -386,7 +402,6 @@ class TaroCard {
                 // console.log('애니메이션 멈춤')
             }
         }
-        this.#stopSounds();
     }
 
     #stopSounds() {

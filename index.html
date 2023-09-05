@@ -67,12 +67,12 @@
 
         const taroCard = new TaroCard(cardDataList, 5);
 
-        //sound -> 시작필요
+        //sound.play -> 시작필요
         document.querySelector('#btnPlay').addEventListener('click', (e) => {
+            e.target.parentNode.classList.add('hide');
             taroCard.init();
             document.querySelector('#maxNums').innerHTML = taroCard.maxSelectCount;
             document.querySelector('.btn-wrap').style.display = 'block';
-            e.target.parentNode.classList.add('hide');
         });
 
         function reset() {
