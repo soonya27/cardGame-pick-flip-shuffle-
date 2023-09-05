@@ -1,0 +1,82 @@
+#canvasContainer {
+    width: 100%;
+    height: calc(100vh - 42px);
+    background-color: #540e80;
+    border: 10px solid #3f0960;
+    box-sizing: border-box;
+}
+
+.info {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px 30px;
+    text-align: right;
+    box-sizing: border-box;
+}
+
+.info strong {
+    font-weight: normal;
+    color: #fff;
+}
+
+.card-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.card-wrap ul {
+    position: relative;
+    display: flex;
+    height: 100%;
+}
+
+.card-wrap ul li {
+    position: absolute;
+    left: -100%;
+    width: 13vw;
+    max-width: 120px;
+    transition: 0.3s;
+    /* z-index: 0; */
+}
+
+.card-wrap ul.clickable li.unClick {
+    cursor: pointer;
+}
+
+.card-wrap ul.clickable li.unClick:hover {
+    transform: translateY(-7%) !important;
+}
+
+.card-wrap ul li img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    transition: transform ease-in-out 600ms;
+}
+
+.card-wrap ul li img.back {
+    /* 임시 이미지 */
+    border-radius: 1.3vw;
+    overflow: hidden;
+}
+
+button {
+    padding: 10px;
+    border: 1px solid #000;
+}
+
+.card-select-wrap {
+    height: 100%;
+}
+
+/* .selected-wrap {
+    border: 1px solid #000;
+} */
