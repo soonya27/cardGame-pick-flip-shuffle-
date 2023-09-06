@@ -95,8 +95,6 @@ class TaroCard {
         //class삭제
         this.#field.querySelector('ul').classList.remove('clickable');
 
-
-
         //클릭여부  -> 클릭된게 있고 클릭 애니메이션 진행중일때
         if (this.selectedList.length != 0) {
             // con('클릭된게잇음');
@@ -523,10 +521,31 @@ class TaroCard {
             ],
                 { duration: flipTimeForAnimation, delay: clickTimeForAnimation + clickDelayForAnimation, fill: "forwards" });
             //filpSound
-            this.#audioTimeout = setTimeout(function () {
+            //                     정중앙에서 flip 애니메이션의 delay                +  flip 애니메이션 duration의 2번째 단계에서 sound시작
+            const soundDelay = (clickTimeForAnimation + clickDelayForAnimation) + flipTimeForAnimation / 3 * 2;
+
+            this.#audioTimeout = setTimeout(() => {
                 playSound(audioObj.filpSound);
-                // 정중앙에서 flip 애니메이션의 delay                +  flip 애니메이션 duration의 2번째 단계에서 sound시작
-            }, (clickTimeForAnimation + clickDelayForAnimation) + flipTimeForAnimation / 3 * 2);
+
+                //sparkle 요소 추가
+                const sparkleImg = document.createElement('img');
+                sparkleImg.setAttribute('src', './img/sparkle_img_twinkl.svg');
+                sparkleImg.classList.add('sparkle-img');
+                sparkleImg.style.width = e.target.clientWidth * 3;
+                this.#field.appendChild(sparkleImg);
+
+                const sparkleAnimation = sparkleImg.animate([
+                    { opacity: 0 },
+                    { opacity: 1 },
+                    { opacity: 0 }
+                ],
+                    { duration: soundDelay + 200, fill: "backwards" });
+                sparkleAnimation.onfinish = () => {
+                    sparkleImg.remove();
+                }
+
+            }, soundDelay);
+
 
             //back 뒷면카드 요소 추가
             this.#animation.click.onfinish = () => {
@@ -607,6 +626,9 @@ class TaroCard {
         // con(this.selectedList)
         this.selectedList.forEach((item, idx) => {
             // con(item);
+            if (this.#field.querySelector('img.sparkle-img')) {
+                this.#field.querySelector('img.sparkle-img').remove();
+            }
             if (item.dom.querySelector('img.back') == null) {
                 //style 되돌리기
                 con('img없음');
@@ -617,7 +639,6 @@ class TaroCard {
                 item.dom.classList.replace('clicked', 'unClick');
                 return;
             }
-
 
             //------------------ *** 가끔 씹히는듯.... ------------------------------//
             con('img가 있음 있는 애들만 flipback 걸어줌');

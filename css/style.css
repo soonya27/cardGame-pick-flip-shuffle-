@@ -68,14 +68,23 @@
     overflow: hidden;
 }
 
-button {
+.card-wrap img.sparkle-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+.btn-wrap button {
     padding: 10px;
     border: 1px solid #000;
 }
 
-.card-select-wrap {
-    height: 100%;
-}
+
+
+
+
 
 /* .selected-wrap {
     border: 1px solid #000;
