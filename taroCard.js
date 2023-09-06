@@ -99,7 +99,7 @@ class TaroCard {
         if (this.selectedList.length != 0) {
             // con('클릭된게잇음');
             if (this.#animation.click && this.#animation.click.playState == 'running') {
-                con('click도중 ->');
+                // con('click도중 ->');
                 //stop -> backfilp -> img요소 없애고 다시 셔플진행
                 this.#stopAnimation();
 
@@ -107,13 +107,13 @@ class TaroCard {
                 this.#resetCardState();
 
             } else {
-                con('click 애니메이션 끝난후 ');
-                con('다시 백플립 후 셔플');
+                // con('click 애니메이션 끝난후 ');
+                // con('다시 백플립 후 셔플');
                 this.#resetCardState();
             }
         } else {
-            con('spread도중일수도');
-            con('shuffle도중일수도');
+            // con('spread도중일수도');
+            // con('shuffle도중일수도');
             this.#stopAnimation('spread', 'shuffle');
             if (this.#animation.spread.playState != 'finished') {
                 this.#animation.spread.onfinish = () => {
@@ -124,36 +124,6 @@ class TaroCard {
             }
         }
     }
-
-    // shuffle() {
-    //     //class삭제
-    //     this.#field.querySelector('ul').classList.remove('clickable');
-
-    //     //click중이거나 클릭된게 있을때
-    //     if (this.#animation?.click?.playState == 'running' ||
-    //         this.#field.querySelectorAll('li.clicked').length != 0) {
-    //         this.#stopAnimation();
-    //         this.#stopSounds();
-    //         this.#resetCardState();
-    //         if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
-    //             this.#animation.flipBack.onfinish = () => {
-    //                 this.#field.querySelectorAll('li img.back').forEach(item => {
-    //                     item.remove();
-    //                 });
-    //                 this.#playShuffleAnimation();
-    //             }
-    //         } else {
-    //             //플립백은 있지만 끝났을때
-    //             this.#playShuffleAnimation();
-    //         }
-    //     } else {
-    //         this.#resetCardState();
-    //         this.#playShuffleAnimation();
-    //     }
-    // }
-
-
-
 
     get cardCount() {
         return this.#cardCount;
@@ -299,17 +269,6 @@ class TaroCard {
         this.#animation.spread.onfinish = () => {
             // class추가
             this.#field.querySelector('ul').classList.add('clickable');
-        }
-    }
-
-    #playShuffleAnimation() {
-        this.#stopAnimation('spread', 'shuffle');
-        if (this.#animation.spread.playState != 'finished') {
-            this.#animation.spread.onfinish = () => {
-                this.#animateshuffle();
-            }
-        } else {
-            this.#animateshuffle();
         }
     }
 
@@ -631,7 +590,7 @@ class TaroCard {
             }
             if (item.dom.querySelector('img.back') == null) {
                 //style 되돌리기
-                con('img없음');
+                // con('img없음');
                 item.dom.animate({
                     opacity: 1
                 },
@@ -641,8 +600,7 @@ class TaroCard {
             }
 
             //------------------ *** 가끔 씹히는듯.... ------------------------------//
-            con('img가 있음 있는 애들만 flipback 걸어줌');
-
+            // con('img가 있음 있는 애들만 flipback 걸어줌');
 
             //반대로 뒤집기  front->앞 back->뒤
             const flipBackTimeForAnimation = 600; //600
@@ -662,7 +620,7 @@ class TaroCard {
         });
         if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
             this.#animation.flipBack.onfinish = () => {
-                con('flip back 끝난뒤');
+                // con('flip back 끝난뒤');
                 this.#field.querySelectorAll('li img.back').forEach(item => {
                     item.remove();
                 });
