@@ -4,7 +4,7 @@ const coverIgmUrl = './img/cover.png';
 const audioObj = {}
 audioObj.clickSound = new Audio('./sounds/crash.mp3');
 audioObj.spreadSound = new Audio('./sounds/spread.mp3');
-audioObj.filpSound = new Audio('./sounds/flipcard.mp3');
+audioObj.filpSound = new Audio('./sounds/sparkle.mp3'); //filpcard.mp3
 audioObj.shuffleSound = new Audio('./sounds/shuffle.mp3');
 audioObj.positionSound = new Audio('./sounds/shuffleSpread.mp3');
 
@@ -513,7 +513,7 @@ class TaroCard {
             e.target.closest('ul').classList.remove('clickable');
 
             //정중앙 위치
-            const flipTimeForAnimation = 1200; //1200
+            const flipTimeForAnimation = 1500; //1200
             this.#animation.click = target.animate([
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0 },
                 { top: '50%', left: '50%', transform: 'translate(-50%,-50%) scale(2)', opacity: 0 },
@@ -528,24 +528,24 @@ class TaroCard {
                 playSound(audioObj.filpSound);
 
                 //sparkle 요소 추가
-                const sparkleImg = document.createElement('img');
-                sparkleImg.setAttribute('src', './img/sparkle_img_twinkl.svg');
-                sparkleImg.classList.add('sparkle-img');
-                sparkleImg.style.width = e.target.clientWidth * 3;
-                this.#field.appendChild(sparkleImg);
+                const sparkleDiv = document.createElement('div');
+                sparkleDiv.classList.add('sparkle-img');
+                sparkleDiv.innerHTML = `<img src='./img/sparkle_img_twinkl.svg'>`;
+                sparkleDiv.style.width = e.target.clientWidth * 5 + 'px';
+                this.#field.appendChild(sparkleDiv);
 
-                const sparkleAnimation = sparkleImg.animate([
+                const sparkleAnimation = sparkleDiv.animate([
                     { opacity: 0 },
                     { opacity: 1 },
-                    { opacity: 0 }
+                    { opacity: 1 },
+                    { opacity: 0 },
                 ],
                     { duration: soundDelay + 200, fill: "backwards" });
                 sparkleAnimation.onfinish = () => {
-                    sparkleImg.remove();
+                    sparkleDiv.remove();
                 }
 
             }, soundDelay);
-
 
             //back 뒷면카드 요소 추가
             this.#animation.click.onfinish = () => {

@@ -68,21 +68,80 @@
     overflow: hidden;
 }
 
-.card-wrap img.sparkle-img {
+.card-wrap .sparkle-img {
+    display: block;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0;
+    /* opacity: 0; */
+    z-index: 1;
 }
+
+.card-wrap .sparkle-img:after {
+    display: block;
+    content: '';
+    position: absolute;
+    top: 15vw;
+    left: 13vw;
+    width: 4.5vw;
+    height: 4.5vw;
+    background-image: url(../img/star.svg);
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    animation: glitter 3.5s linear infinite;
+    /* animation: name duration timing-function delay iteration-count direction fill-mode; */
+}
+
+.card-wrap .sparkle-img:before {
+    display: block;
+    content: '';
+    position: absolute;
+    top: 20vw;
+    right: 11vw;
+    width: 6.778vw;
+    height: 6.778vw;
+    background-image: url(../img/star.svg);
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    animation: glitter 3.5s linear infinite;
+    /* animation: name duration timing-function delay iteration-count direction fill-mode; */
+}
+
+
+.card-wrap .sparkle-img img {
+    width: 100%;
+}
+
 
 .btn-wrap button {
     padding: 10px;
     border: 1px solid #000;
 }
 
+@keyframes glitter {
+    0% {
+        transform: scale(1.0);
+    }
 
+    25% {
+        transform: scale(0.5);
+    }
 
+    50% {
+        transform: scale(1.0);
+    }
+
+    75% {
+        transform: scale(0.5);
+    }
+
+    100% {
+        transform: scale(1.0);
+    }
+}
 
 
 
