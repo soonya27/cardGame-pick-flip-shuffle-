@@ -45,6 +45,7 @@ class TaroCard {
     #animation;
     #selcetedList;
     #audioTimeout;
+    #init;
     constructor(cardObj, maxCnt) {
         this.#MAX_CARDS_IN_ONE_LINE = 11; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
@@ -62,13 +63,15 @@ class TaroCard {
         this.#cardCount = cardObj.length;
         cardObj.map(item => this.#cardList.push({ data: item }));
         window.addEventListener('resize', () => {
-            this.reset();
+            this.#init && this.reset();
         });
     }
 
     init() {
         this.#randomList();
         this.#render();
+
+        this.#init = true;
     }
 
     /**
@@ -146,6 +149,36 @@ class TaroCard {
             }
         }
     }
+
+    // shuffle() {
+    //     //class삭제
+    //     this.#field.querySelector('ul').classList.remove('clickable');
+
+    //     //click중이거나 클릭된게 있을때
+    //     if (this.#animation?.click?.playState == 'running' ||
+    //         this.#field.querySelectorAll('li.clicked').length != 0) {
+    //         this.#stopAnimation();
+    //         this.#stopSounds();
+    //         this.#resetCardState();
+    //         if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
+    //             this.#animation.flipBack.onfinish = () => {
+    //                 this.#field.querySelectorAll('li img.back').forEach(item => {
+    //                     item.remove();
+    //                 });
+    //                 this.#playShuffleAnimation();
+    //             }
+    //         } else {
+    //             //플립백은 있지만 끝났을때
+    //             this.#playShuffleAnimation();
+    //         }
+    //     } else {
+    //         this.#resetCardState();
+    //         this.#playShuffleAnimation();
+    //     }
+    // }
+
+
+
 
     get cardCount() {
         return this.#cardCount;
