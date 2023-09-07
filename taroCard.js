@@ -98,9 +98,7 @@ class TaroCard {
 
         //클릭여부  -> 클릭된게 있고 클릭 애니메이션 진행중일때
         if (this.selectedList.length != 0) {
-            // con('클릭된게잇음');
             if (this.#animation.click && this.#animation.click.playState == 'running') {
-                // con('click도중 ->');
                 //stop -> backfilp -> img요소 없애고 다시 셔플진행
                 this.#stopAnimation();
 
@@ -108,13 +106,10 @@ class TaroCard {
                 this.#resetCardState();
 
             } else {
-                // con('click 애니메이션 끝난후 ');
-                // con('다시 백플립 후 셔플');
                 this.#resetCardState();
             }
         } else {
-            // con('spread도중일수도');
-            // con('shuffle도중일수도');
+            //spread 또는 shuffle 중이거나 아무것도 아닌상태
             this.#stopAnimation('spread', 'shuffle');
             if (this.#animation.spread.playState != 'finished') {
                 this.#animation.spread.onfinish = () => {
@@ -584,15 +579,12 @@ class TaroCard {
      * 뒤집어진 카드 reset
      */
     #resetCardState() {
-        // con(this.selectedList)
         this.selectedList.forEach((item, idx) => {
-            // con(item);
             if (this.#field.querySelector('.sparkle-img')) {
                 this.#field.querySelector('.sparkle-img').remove();
             }
             if (item.dom.querySelector('img.back') == null) {
                 //style 되돌리기
-                // con('img없음');
                 item.dom.animate({
                     opacity: 1
                 },
@@ -602,7 +594,6 @@ class TaroCard {
             }
 
             //------------------ *** 가끔 씹히는듯.... ------------------------------//
-            // con('img가 있음 있는 애들만 flipback 걸어줌');
 
             //반대로 뒤집기  front->앞 back->뒤
             const flipBackTimeForAnimation = 600; //600
@@ -622,7 +613,6 @@ class TaroCard {
         });
         if (this.#animation.flipBack && this.#animation.flipBack.playState == 'running') {
             this.#animation.flipBack.onfinish = () => {
-                // con('flip back 끝난뒤');
                 this.#field.querySelectorAll('li img.back').forEach(item => {
                     item.remove();
                 });
