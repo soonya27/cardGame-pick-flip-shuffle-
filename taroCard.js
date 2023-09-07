@@ -45,9 +45,10 @@ class TaroCard {
     #animation;
     #selcetedList;
     #audioTimeout;
+    #imgTimeout;
     #init;
     constructor(cardObj, maxCnt) {
-        this.#MAX_CARDS_IN_ONE_LINE = 11; //한줄 최대 카드갯수
+        this.#MAX_CARDS_IN_ONE_LINE = 12; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
         if (maxCnt > 5) {
             con('최대 선택가능한 카드는 5개입니다.');
@@ -70,7 +71,7 @@ class TaroCard {
 
     init() {
         this.#randomList();
-        this.#render();
+        this.#render('reset');
 
         this.#init = true;
     }
@@ -80,7 +81,7 @@ class TaroCard {
      */
     reset() {
         this.#randomList();
-        this.#render();
+        this.#render('reset');
 
         const resetPosition = '-100%';
         //위치 reset
@@ -137,7 +138,8 @@ class TaroCard {
         return this.#selcetedList;
     }
 
-    #render() {
+    #render(doWhat) {
+        clearTimeout(this.#imgTimeout);
         this.#field.innerHTML = '';
         const cardUl = document.createElement('ul');
         this.#field.appendChild(cardUl);
@@ -199,7 +201,11 @@ class TaroCard {
             // this.#field.style.background = `url(/card01.png) no-repeat 50% ${this.#selectedAreaPosition.top}px`;
             // this.#field.style.backgroundSize = `cover`;
 
-            this.#spread();
+            if (doWhat == 'reset') {
+                this.#spread()
+            } else {
+                this.#spreadCurveAnimation();
+            }
         };
     }
 
@@ -341,60 +347,125 @@ class TaroCard {
 
         //카드 펼치기
         this.#animation.shuffle.onfinish = () => {
-            //위치 변경(0)
-            this.#cardList.forEach((item, idx) => {
-                // item.dom.style.zIndex = 0;
-                item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }],
-                    { duration: 300, fill: 'forwards' })
-            });
-            //spread sound
-            this.#stopSounds();
-            this.#audioTimeout = setTimeout(function () {
-                audioObj.spreadSound.volume = 0.6;
-                playSound(audioObj.spreadSound);
-            }, 300);
-            this.#audioTimeout = setTimeout(function () {
-                playSound(audioObj.spreadSound);
-            }, 1300);
-
-            const topTimeForAnimation = 500; //500
-            let rightPosition = 0;
-            let topDelay = 0;
-            this.#cardListTop.forEach((item, idx) => {
-
-                const delay = topTimeForAnimation / this.#cardListTop.length * idx;
-                rightPosition = this.#calculateLeftPosition(this.#cardListTop, idx);
-                topDelay = topTimeForAnimation / this.#cardListTop.length * (idx - 2);
-
-                item.dom.animate([
-                    { left: this.#calculateLeftPosition(this.#cardListTop, idx) }],
-                    { duration: topTimeForAnimation, fill: "forwards", delay });
-            });
-
-            this.#cardListBottom.forEach((item, idx) => {
-                //top
-                const topVw = this.#calculateVw(this.#cardHeight + this.#CARD_ROW_GAP) + 'vw';
-                const lastSpreadDelay = 400;
-                //윗줄과 함께 이동
-                item.dom.animate([
-                    { left: 0, top: 0 }, { left: rightPosition, top: 0 },],
-                    { duration: topTimeForAnimation, fill: "forwards", delay: topDelay });
-                //아래줄로 이동
-                item.dom.animate([
-                    { left: rightPosition, top: 0 }, { left: 0, top: topVw },],
-                    { duration: lastSpreadDelay, fill: "forwards", delay: topDelay + topTimeForAnimation });
-                //펼쳐지기
-                this.#animation.shuffleSpread = item.dom.animate([{ top: topVw, left: this.#calculateLeftPosition(this.#cardListBottom, idx) },],
-                    { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + lastSpreadDelay });
-            });
-
-            if (!this.#animation.shuffleSpread) return;
-            this.#animation.shuffleSpread.onfinish = () => {
-                //펼쳐진후 클릭가능(class 추가)
-                this.#field.querySelector('ul').classList.add('clickable');
-            }
+            this.#spreadLine();
         }
     }
+
+
+    #spreadLine() {
+        //위치 변경(0)
+        this.#cardList.forEach((item, idx) => {
+            // item.dom.style.zIndex = 0;
+            item.dom.animate([{ top: 0, left: 0, transform: 'translateX(0)' }],
+                { duration: 300, fill: 'forwards' })
+        });
+        //spread sound
+        this.#stopSounds();
+        this.#audioTimeout = setTimeout(function () {
+            audioObj.spreadSound.volume = 0.6;
+            playSound(audioObj.spreadSound);
+        }, 300);
+        this.#audioTimeout = setTimeout(function () {
+            playSound(audioObj.spreadSound);
+        }, 1300);
+
+        const topTimeForAnimation = 500; //500
+        let leftPosition = 0;
+        let topDelay = 0;
+        this.#cardListTop.forEach((item, idx) => {
+
+            const delay = topTimeForAnimation / this.#cardListTop.length * idx;
+            leftPosition = this.#calculateLeftPosition(this.#cardListTop, idx);
+            topDelay = topTimeForAnimation / this.#cardListTop.length * (idx - 2);
+
+            item.dom.animate([
+                { left: this.#calculateLeftPosition(this.#cardListTop, idx) }],
+                { duration: topTimeForAnimation, fill: "forwards", delay });
+        });
+
+        this.#cardListBottom.forEach((item, idx) => {
+            //top
+            const topVw = this.#calculateVw(this.#cardHeight + this.#CARD_ROW_GAP) + 'vw';
+            const lastSpreadDelay = 400;
+            //윗줄과 함께 이동
+            item.dom.animate([
+                { left: 0, top: 0 }, { left: leftPosition, top: 0 },],
+                { duration: topTimeForAnimation, fill: "forwards", delay: topDelay });
+            //아래줄로 이동
+            item.dom.animate([
+                { left: leftPosition, top: 0 }, { left: 0, top: topVw },],
+                { duration: lastSpreadDelay, fill: "forwards", delay: topDelay + topTimeForAnimation });
+            //펼쳐지기
+            this.#animation.shuffleSpread = item.dom.animate([{ top: topVw, left: this.#calculateLeftPosition(this.#cardListBottom, idx) },],
+                { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + lastSpreadDelay });
+        });
+
+        if (!this.#animation.shuffleSpread) return;
+        this.#animation.shuffleSpread.onfinish = () => {
+            //펼쳐진후 클릭가능(class 추가)
+            this.#field.querySelector('ul').classList.add('clickable');
+        }
+    }
+
+    spreadCurve() {
+        this.#randomList();
+        this.#render('curve');
+    }
+    #spreadCurveAnimation() {
+        this.#stopAnimation();
+        const topLinePosition = this.#cardHeight / 4;
+        this.#cardList.forEach((item, idx) => {
+            item.dom.animate([{ top: this.#calculateVw(topLinePosition) + 'vw', left: 0, transform: 'translateX(0)' }],
+                { duration: 300, fill: 'forwards' })
+        });
+        //spread sound
+        // this.#stopSounds();
+        // this.#audioTimeout = setTimeout(function () {
+        //     audioObj.spreadSound.volume = 0.6;
+        //     playSound(audioObj.spreadSound);
+        // }, 300);
+        // this.#audioTimeout = setTimeout(function () {
+        //     playSound(audioObj.spreadSound);
+        // }, 1300);
+
+        const topTimeForAnimation = 500; //500
+        let leftPosition = 0;
+        let topPostion = 0;
+        let topDelay = 0;
+        this.#cardListTop.forEach((item, idx) => {
+
+            const delay = topTimeForAnimation / this.#cardListTop.length * idx;
+            leftPosition = this.#calculateLeftPosition(this.#cardListTop, idx);
+            topPostion = this.#calculateTopPosition(this.#cardListTop, idx, topLinePosition) + 'px';
+            topDelay = topTimeForAnimation / this.#cardListTop.length * (idx - 2);
+            item.dom.animate([
+                { left: this.#calculateLeftPosition(this.#cardListTop, idx), top: topPostion }],
+                { duration: topTimeForAnimation, fill: "forwards", delay });
+        });
+
+        this.#cardListBottom.forEach((item, idx) => {
+            //top
+            const topVw = this.#cardHeight + this.#CARD_ROW_GAP + 30; //top위치
+            const lastSpreadDelay = 400;
+            //아래줄로 이동
+            item.dom.animate([
+                { left: 0, top: this.#calculateVw(topVw) + 'vw' },],
+                { duration: lastSpreadDelay, fill: "forwards", delay: topDelay + topTimeForAnimation });
+            //펼쳐지기
+            topPostion = this.#calculateTopPosition(this.#cardListBottom, idx, topLinePosition) + topVw + 'px';
+            this.#animation.shuffleSpread = item.dom.animate([{ top: topPostion, left: this.#calculateLeftPosition(this.#cardListBottom, idx) },],
+                { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + lastSpreadDelay });
+        });
+
+        if (!this.#animation.shuffleSpread) return;
+        this.#animation.shuffleSpread.onfinish = () => {
+            //펼쳐진후 클릭가능(class 추가)
+            this.#field.querySelector('ul').classList.add('clickable');
+        }
+    }
+
+
+
 
     #calculateVw(px) {
         return ((px) / window.innerWidth * 100);
@@ -410,6 +481,27 @@ class TaroCard {
         let leftPx = ((this.#fieldWidth - this.#cardWidth) / (cardList.length - 1));
         return Math.ceil(leftPx * idx) + 'px';
     }
+
+    #calculateTopPosition(cardList, idx, startTop) {
+        let half = cardList.length / 2
+        let firstHalf = Math.ceil(half) - 1;
+        let lastHalf = Math.floor(half) - 1;
+        // con(half)
+        const decrease = startTop - (startTop / firstHalf * idx); // 15 7.5 0
+        const increase = (startTop / lastHalf * (idx - lastHalf - 1)); //0  7.5 15
+        if (idx < half) {
+            // con(decrease)
+            return decrease;
+        } else if ((firstHalf == lastHalf) && (idx == Math.floor(half))) {
+            return 0;
+        } else {
+            // con(increase)
+            return increase;
+        }
+
+    }
+
+
 
     #stopAnimation(...except) {
         for (let key in this.#animation) {
@@ -481,7 +573,8 @@ class TaroCard {
 
             this.#audioTimeout = setTimeout(() => {
                 playSound(audioObj.filpSound);
-
+            }, soundDelay);
+            this.#imgTimeout = setTimeout(() => {
                 //sparkle 요소 추가
                 const sparkleDiv = document.createElement('div');
                 sparkleDiv.classList.add('sparkle-img');
@@ -499,8 +592,9 @@ class TaroCard {
                 sparkleAnimation.onfinish = () => {
                     sparkleDiv.remove();
                 }
-
             }, soundDelay);
+
+
 
             //back 뒷면카드 요소 추가
             this.#animation.click.onfinish = () => {
@@ -580,6 +674,7 @@ class TaroCard {
      */
     #resetCardState() {
         this.selectedList.forEach((item, idx) => {
+            clearTimeout(this.#imgTimeout);
             if (this.#field.querySelector('.sparkle-img')) {
                 this.#field.querySelector('.sparkle-img').remove();
             }
