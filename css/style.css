@@ -40,7 +40,7 @@
     left: -100%;
     width: 13vw;
     max-width: 120px;
-    transition: 0.3s;
+    /* transition: 0.3s; */
     /* z-index: 0; */
 }
 
@@ -90,7 +90,7 @@
     background-size: cover;
     background-position: 50% 50%;
     background-repeat: no-repeat;
-    animation: glitter 3.5s linear infinite;
+    animation: glitter 3.5s 1s linear infinite;
     /* animation: name duration timing-function delay iteration-count direction fill-mode; */
 }
 

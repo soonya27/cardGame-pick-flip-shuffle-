@@ -62,9 +62,10 @@ class TaroCard {
         this.#selectedAreaPosition = {}
         this.#cardCount = cardObj.length;
         cardObj.map(item => this.#cardList.push({ data: item }));
-        window.addEventListener('resize', () => {
-            this.#init && this.reset();
-        });
+        //반응형
+        // window.addEventListener('resize', () => {
+        //     this.#init && this.reset();
+        // });
     }
 
     init() {
@@ -532,6 +533,7 @@ class TaroCard {
                 ];
                 const position = selectedCardPositionList[this.selectedList.length - 1][selectedCardPositionList[this.selectedList.length - 1].length - 1];
 
+
                 if (this.selectedList.length > 1) {
                     const length = this.selectedList.length;
                     //이미 내려진 카드 옮기기
@@ -539,7 +541,7 @@ class TaroCard {
                         const position = selectedCardPositionList[length - 1][idx];
                         item.dom.animate([
                             {
-                                top: position.top + 'px',
+                                // top: position.top + 'px',
                                 left: position.left,
                                 transform: 'translate(-50%, -50%)',
                                 zIndex: 1
@@ -585,8 +587,8 @@ class TaroCard {
         // con(this.selectedList)
         this.selectedList.forEach((item, idx) => {
             // con(item);
-            if (this.#field.querySelector('img.sparkle-img')) {
-                this.#field.querySelector('img.sparkle-img').remove();
+            if (this.#field.querySelector('.sparkle-img')) {
+                this.#field.querySelector('.sparkle-img').remove();
             }
             if (item.dom.querySelector('img.back') == null) {
                 //style 되돌리기
