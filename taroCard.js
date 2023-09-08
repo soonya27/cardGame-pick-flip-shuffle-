@@ -35,6 +35,7 @@ class TaroCard {
     #MAX_SELECET_CNT;
     #field;
     #fieldWidth;
+    #fieldHeight;
     #cardList;
     #cardListTop;
     #cardListBottom;
@@ -65,9 +66,10 @@ class TaroCard {
         this.#cardCount = cardObj.length;
         cardObj.map(item => this.#cardList.push({ data: item }));
         //반응형
-        // window.addEventListener('resize', () => {
-        //     this.#init && this.reset();
-        // });
+        window.addEventListener('resize', () => {
+            // this.#init && this.reset();
+            this.#init && this.#calculate();
+        });
     }
 
     /**
@@ -196,29 +198,7 @@ class TaroCard {
         const coverImg = new Image();
         coverImg.src = coverIgmUrl;
         coverImg.onload = () => {
-            //img높이값
-            this.#cardHeight = this.#field.querySelector('li img').offsetHeight;
-            this.#cardWidth = this.#field.querySelector('li img').offsetWidth;
-
-            this.#fieldWidth = this.#field.clientWidth -
-                (parseInt(window.getComputedStyle(this.#field).paddingLeft) +
-                    parseInt(window.getComputedStyle(this.#field).paddingRight));
-
-            //li높이값 수동으로지정 -> 안의 img가 position:absolute이기때문에
-            this.#field.querySelectorAll('li').forEach((item, idx) => {
-                item.style.height = this.#cardHeight + 'px';
-            });
-
-            //카드펼쳐지는 영역 position
-            this.#selectedAreaPosition.top = this.#cardHeight * 2 + this.#CARD_ROW_GAP;
-            this.#selectedAreaPosition.innerHeight = this.#field.clientHeight -
-                (parseInt(window.getComputedStyle(this.#field).paddingTop) +
-                    parseInt(window.getComputedStyle(this.#field).paddingBottom));
-            this.#selectedAreaPosition.bottom = this.#selectedAreaPosition.innerHeight -
-                this.#cardHeight;
-            this.#selectedAreaPosition.verticleCenter = this.#selectedAreaPosition.top +
-                ((this.#selectedAreaPosition.innerHeight -
-                    this.#selectedAreaPosition.top) / 2);
+            this.#calculate();
 
             //------------------ *** 카드 펼쳐질 영역 ui  bgimg 위치 css ...... ------------------------------//
             //(this.#selectedAreaPosition)카드 펼쳐질 영역 ui
@@ -231,6 +211,33 @@ class TaroCard {
                 this.#spread();
             }
         };
+    }
+
+    #calculate() {
+        //img높이값
+        this.#cardHeight = this.#field.querySelector('li img').offsetHeight;
+        this.#cardWidth = this.#field.querySelector('li img').offsetWidth;
+
+        this.#fieldWidth = this.#field.clientWidth -
+            (parseInt(window.getComputedStyle(this.#field).paddingLeft) +
+                parseInt(window.getComputedStyle(this.#field).paddingRight));
+
+        //li높이값 수동으로지정 -> 안의 img가 position:absolute이기때문에
+        this.#field.querySelectorAll('li').forEach((item, idx) => {
+            item.style.height = this.#cardHeight + 'px';
+        });
+
+        //카드펼쳐지는 영역 position
+        this.#selectedAreaPosition.top = this.#cardHeight * 2 + this.#CARD_ROW_GAP;
+        this.#fieldHeight = this.#field.clientHeight -
+            (parseInt(window.getComputedStyle(this.#field).paddingTop) +
+                parseInt(window.getComputedStyle(this.#field).paddingBottom));
+        this.#selectedAreaPosition.bottom = this.#fieldHeight -
+            this.#cardHeight;
+
+        this.#selectedAreaPosition.verticalCenter = this.#selectedAreaPosition.top +
+            ((this.#fieldHeight -
+                this.#selectedAreaPosition.top) / 2);
     }
 
     /**
@@ -454,10 +461,11 @@ class TaroCard {
             //윗줄과 함께 이동
             item.dom.animate(topAnimation,
                 { duration: topTimeForAnimation, fill: "forwards", delay: 300 });
-            topPostion = this.#calculateTopPosition(this.#cardListBottom, idx, topLinePosition) + topVw + 'px';
+            topPostion = this.#calculateVw(this.#calculateTopPosition(this.#cardListBottom, idx, topLinePosition)) +
+                this.#calculateVw(topVw) + 'vw';
             //아래줄로 이동
             item.dom.animate([
-                { left: 0, top: topLinePosition + topVw + 'px' },],
+                { left: 0, top: this.#calculateVw(topLinePosition + topVw) + 'vw' },],
                 { duration: lastSpreadDelay, fill: "forwards", delay: topTimeForAnimation + 300 });
             //펼쳐지기
             bottomAnimation.push({ top: topPostion, left: this.#calculateLeftPosition(this.#cardListTop, idx) });
@@ -554,11 +562,11 @@ class TaroCard {
 
                 //하단영역 카드 정렬
                 const selectedCardPositionList = [
-                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '50%' }],
-                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '60%' }],
-                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '50%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '70%' }],
-                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '20%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '60%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '80%' }],
-                    [{ top: this.#selectedAreaPosition.verticleCenter, left: '10%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '50%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '70%' }, { top: this.#selectedAreaPosition.verticleCenter, left: '90%' }],
+                    [{ top: this.#selectedAreaPosition.verticalCenter, left: '50%' }],
+                    [{ top: this.#selectedAreaPosition.verticalCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '60%' }],
+                    [{ top: this.#selectedAreaPosition.verticalCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '50%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '70%' }],
+                    [{ top: this.#selectedAreaPosition.verticalCenter, left: '20%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '40%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '60%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '80%' }],
+                    [{ top: this.#selectedAreaPosition.verticalCenter, left: '10%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '30%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '50%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '70%' }, { top: this.#selectedAreaPosition.verticalCenter, left: '90%' }],
                 ];
                 const position = selectedCardPositionList[this.selectedList.length - 1][selectedCardPositionList[this.selectedList.length - 1].length - 1];
 
@@ -583,7 +591,7 @@ class TaroCard {
                 }
                 this.#animation.click = target.animate([
                     {
-                        top: position.top + 'px',
+                        top: (position.top / this.#fieldHeight * 100) + '%',
                         left: position.left,
                         transform: 'translate(-50%, -50%)',
                         zIndex: 1
@@ -662,6 +670,10 @@ class TaroCard {
         return ((px) / window.innerWidth * 100);
     }
 
+    #calculatePercentage(num) {
+        return ((num) / this.#fieldWidth * 100) + '%';
+    }
+
     /**
      * spread, curve시 카드 left position
      * @param {*} cardList 
@@ -670,7 +682,7 @@ class TaroCard {
      */
     #calculateLeftPosition(cardList, idx) {
         let leftPx = ((this.#fieldWidth - this.#cardWidth) / (cardList.length - 1));
-        return Math.ceil(leftPx * idx) + 'px';
+        return this.#calculatePercentage(Math.ceil(leftPx * idx));
     }
 
     /**
