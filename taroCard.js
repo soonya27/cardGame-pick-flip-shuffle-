@@ -468,7 +468,7 @@ class TaroCard {
                 { left: 0, top: this.#calculateVw(topLinePosition + topVw) + 'vw' },],
                 { duration: lastSpreadDelay, fill: "forwards", delay: topTimeForAnimation + 300 });
             //펼쳐지기
-            bottomAnimation.push({ top: topPostion, left: this.#calculateLeftPosition(this.#cardListTop, idx) });
+            bottomAnimation.push({ top: topPostion, left: this.#calculateLeftPosition(this.#cardListBottom, idx) });
             this.#animation.spread = item.dom.animate(bottomAnimation,
                 { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + lastSpreadDelay + 300 });
         });
