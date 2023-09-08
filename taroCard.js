@@ -68,7 +68,7 @@ class TaroCard {
         //반응형
         window.addEventListener('resize', () => {
             // this.#init && this.reset();
-            this.#init && this.#calculate();
+            this.#init && this.#measure();
         });
     }
 
@@ -198,7 +198,7 @@ class TaroCard {
         const coverImg = new Image();
         coverImg.src = coverIgmUrl;
         coverImg.onload = () => {
-            this.#calculate();
+            this.#measure();
 
             //------------------ *** 카드 펼쳐질 영역 ui  bgimg 위치 css ...... ------------------------------//
             //(this.#selectedAreaPosition)카드 펼쳐질 영역 ui
@@ -213,7 +213,7 @@ class TaroCard {
         };
     }
 
-    #calculate() {
+    #measure() {
         //img높이값
         this.#cardHeight = this.#field.querySelector('li img').offsetHeight;
         this.#cardWidth = this.#field.querySelector('li img').offsetWidth;
