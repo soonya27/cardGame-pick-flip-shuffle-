@@ -19,9 +19,9 @@ audioObj.positionSound = new Audio('./sounds/shuffleSpread.mp3');
  * @param {number} maxCnt : 선택가능한 카드  (최대 5)
  * 
  * method
- * - init() : 기본 세팅
- * - reset() : 카드 리셋(라인이 기본)
- * - shuffle() : 카드 섞기
+ * - init() : 기본 세팅(일자라인이 기본)
+ * - spreadCurve() : 커브 라인 세팅
+ * - shuffle() : 카드 섞기  (line | curve 유지)
  * 
  * property
  * - cardCount :number - 전체 카드 수
@@ -47,6 +47,7 @@ class TaroCard {
     #audioTimeout;
     #imgTimeout;
     #init;
+    #isCurve;
     constructor(cardObj, maxCnt) {
         this.#MAX_CARDS_IN_ONE_LINE = 12; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
@@ -69,20 +70,15 @@ class TaroCard {
         // });
     }
 
-    init() {
-        this.#randomList();
-        this.#render('reset');
-
-        this.#init = true;
-    }
-
     /**
-     * 카드 초기화 : 기본 라인정렬(spread)
-     */
-    reset() {
-        this.#randomList();
-        this.#render('reset');
+    * 카드 초기화 : 기본 라인정렬(spread)
+    */
+    init() {
+        this.#init = true;
+        this.#isCurve = false;
 
+        this.#randomList();
+        this.#render();
         const resetPosition = '-100%';
         //위치 reset
         this.#cardList.forEach(item => {
@@ -91,7 +87,17 @@ class TaroCard {
     }
 
     /**
+    * 커브 라인정렬 
+    */
+    spreadCurve() {
+        this.#isCurve = true;
+        this.#randomList();
+        this.#render();
+    }
+
+    /**
     * 카드를 섞음 -> rerender하지 않고 cardList를 update 함 
+    * curve,line 상태값 유지한채 shuffle
     */
     shuffle() {
         //class삭제
@@ -114,10 +120,10 @@ class TaroCard {
             this.#stopAnimation('spread', 'shuffle');
             if (this.#animation.spread.playState != 'finished') {
                 this.#animation.spread.onfinish = () => {
-                    this.#animateshuffle();
+                    this.#shuffleAnimation();
                 }
             } else {
-                this.#animateshuffle();
+                this.#shuffleAnimation();
             }
         }
     }
@@ -138,7 +144,25 @@ class TaroCard {
         return this.#selcetedList;
     }
 
-    #render(doWhat) {
+    /**
+    * 현재생성돼있는 dom 요소의 데이터를 this.#cardList에 업데이트
+    */
+    #updateList() {
+        this.#field.querySelectorAll('li').forEach((item, idx) => {
+            item.setAttribute('data-id', '');
+            item.setAttribute('data-id', this.#cardList[idx].data.id);
+            this.#cardList[idx].dom = item;
+        });
+    }
+
+    #randomList() {
+        this.#cardList.sort(() => Math.random() - 0.5);
+        this.#cardListTop = Array.from(this.#cardList).slice(0, this.#MAX_CARDS_IN_ONE_LINE);
+        this.#cardListBottom = Array.from(this.#cardList).slice(this.#MAX_CARDS_IN_ONE_LINE);
+        this.#selcetedList = [];
+    }
+
+    #render() {
         clearTimeout(this.#imgTimeout);
         this.#field.innerHTML = '';
         const cardUl = document.createElement('ul');
@@ -201,34 +225,16 @@ class TaroCard {
             // this.#field.style.background = `url(/card01.png) no-repeat 50% ${this.#selectedAreaPosition.top}px`;
             // this.#field.style.backgroundSize = `cover`;
 
-            if (doWhat == 'reset') {
-                this.#spread()
-            } else {
+            if (this.#isCurve) {
                 this.#spreadCurveAnimation();
+            } else {
+                this.#spread();
             }
         };
     }
 
     /**
-     * 현재생성돼있는 dom 요소의 데이터를 this.#cardList에 업데이트
-     */
-    #updateList() {
-        this.#field.querySelectorAll('li').forEach((item, idx) => {
-            item.setAttribute('data-id', '');
-            item.setAttribute('data-id', this.#cardList[idx].data.id);
-            this.#cardList[idx].dom = item;
-        });
-    }
-
-    #randomList() {
-        this.#cardList.sort(() => Math.random() - 0.5);
-        this.#cardListTop = Array.from(this.#cardList).slice(0, this.#MAX_CARDS_IN_ONE_LINE);
-        this.#cardListBottom = Array.from(this.#cardList).slice(this.#MAX_CARDS_IN_ONE_LINE);
-        this.#selcetedList = [];
-    }
-
-    /**
-     * 카드 펼쳐지기 -> ( reset )
+     * 카드 펼쳐지기 -> ( defaul line spread )
      */
     #spread() {
         this.#stopAnimation();
@@ -274,13 +280,14 @@ class TaroCard {
         }
     }
 
-    #animateshuffle() {
+    #shuffleAnimation() {
         this.#randomList();
         this.#updateList();
 
         //shffle -> 애니메이션 멈춤..
         this.#stopAnimation();
         this.#stopSounds();
+
         //shuffleSound
         this.#audioTimeout = setTimeout(() => {
             this.#stopSounds();
@@ -347,12 +354,15 @@ class TaroCard {
 
         //카드 펼치기
         this.#animation.shuffle.onfinish = () => {
-            this.#spreadLine();
+            if (this.#isCurve) {
+                this.#spreadCurveAnimation();
+            } else {
+                this.#spreadLineAnimation();
+            }
         }
     }
 
-
-    #spreadLine() {
+    #spreadLineAnimation() {
         //위치 변경(0)
         this.#cardList.forEach((item, idx) => {
             // item.dom.style.zIndex = 0;
@@ -407,10 +417,6 @@ class TaroCard {
         }
     }
 
-    spreadCurve() {
-        this.#randomList();
-        this.#render('curve');
-    }
     #spreadCurveAnimation() {
         this.#stopAnimation();
         const topLinePosition = this.#cardHeight / 4;
@@ -418,117 +424,52 @@ class TaroCard {
             item.dom.animate([{ top: this.#calculateVw(topLinePosition) + 'vw', left: 0, transform: 'translateX(0)' }],
                 { duration: 300, fill: 'forwards' })
         });
+
         //spread sound
-        // this.#stopSounds();
-        // this.#audioTimeout = setTimeout(function () {
-        //     audioObj.spreadSound.volume = 0.6;
-        //     playSound(audioObj.spreadSound);
-        // }, 300);
-        // this.#audioTimeout = setTimeout(function () {
-        //     playSound(audioObj.spreadSound);
-        // }, 1300);
+        this.#stopSounds();
+        this.#audioTimeout = setTimeout(function () {
+            audioObj.spreadSound.volume = 0.6;
+            playSound(audioObj.spreadSound);
+        }, 300);
+        this.#audioTimeout = setTimeout(function () {
+            playSound(audioObj.spreadSound);
+        }, 1300);
 
         const topTimeForAnimation = 500; //500
-        let leftPosition = 0;
         let topPostion = 0;
-        let topDelay = 0;
+        let topAnimation = [];
+
         this.#cardListTop.forEach((item, idx) => {
 
-            const delay = topTimeForAnimation / this.#cardListTop.length * idx;
-            leftPosition = this.#calculateLeftPosition(this.#cardListTop, idx);
             topPostion = this.#calculateTopPosition(this.#cardListTop, idx, topLinePosition) + 'px';
-            topDelay = topTimeForAnimation / this.#cardListTop.length * (idx - 2);
-            item.dom.animate([
-                { left: this.#calculateLeftPosition(this.#cardListTop, idx), top: topPostion }],
-                { duration: topTimeForAnimation, fill: "forwards", delay });
+            topAnimation.push({ top: topPostion, left: this.#calculateLeftPosition(this.#cardListTop, idx) });
+            item.dom.animate(topAnimation,
+                { duration: topTimeForAnimation, fill: "forwards", delay: 300 });
         });
-
+        let bottomAnimation = [];
         this.#cardListBottom.forEach((item, idx) => {
             //top
-            const topVw = this.#cardHeight + this.#CARD_ROW_GAP + 30; //top위치
+            const topVw = this.#cardHeight + this.#CARD_ROW_GAP * 1.5; //top위치
             const lastSpreadDelay = 400;
+            //윗줄과 함께 이동
+            item.dom.animate(topAnimation,
+                { duration: topTimeForAnimation, fill: "forwards", delay: 300 });
+            topPostion = this.#calculateTopPosition(this.#cardListBottom, idx, topLinePosition) + topVw + 'px';
             //아래줄로 이동
             item.dom.animate([
-                { left: 0, top: this.#calculateVw(topVw) + 'vw' },],
-                { duration: lastSpreadDelay, fill: "forwards", delay: topDelay + topTimeForAnimation });
+                { left: 0, top: topLinePosition + topVw + 'px' },],
+                { duration: lastSpreadDelay, fill: "forwards", delay: topTimeForAnimation + 300 });
             //펼쳐지기
-            topPostion = this.#calculateTopPosition(this.#cardListBottom, idx, topLinePosition) + topVw + 'px';
-            this.#animation.shuffleSpread = item.dom.animate([{ top: topPostion, left: this.#calculateLeftPosition(this.#cardListBottom, idx) },],
-                { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + topDelay + lastSpreadDelay });
+            bottomAnimation.push({ top: topPostion, left: this.#calculateLeftPosition(this.#cardListTop, idx) });
+            this.#animation.spread = item.dom.animate(bottomAnimation,
+                { duration: topTimeForAnimation, fill: "forwards", delay: topTimeForAnimation + lastSpreadDelay + 300 });
         });
 
-        if (!this.#animation.shuffleSpread) return;
-        this.#animation.shuffleSpread.onfinish = () => {
+        if (!this.#animation.spread) return;
+        this.#animation.spread.onfinish = () => {
             //펼쳐진후 클릭가능(class 추가)
             this.#field.querySelector('ul').classList.add('clickable');
         }
-    }
-
-
-
-
-    #calculateVw(px) {
-        return ((px) / window.innerWidth * 100);
-    }
-
-    /**
-     * spread시 카드 left position
-     * @param {*} cardList 
-     * @param {*} idx 
-     * @returns {string} 
-     */
-    #calculateLeftPosition(cardList, idx) {
-        let leftPx = ((this.#fieldWidth - this.#cardWidth) / (cardList.length - 1));
-        return Math.ceil(leftPx * idx) + 'px';
-    }
-
-    #calculateTopPosition(cardList, idx, startTop) {
-        let half = cardList.length / 2
-        let firstHalf = Math.ceil(half) - 1;
-        let lastHalf = Math.floor(half) - 1;
-        // con(half)
-        const decrease = startTop - (startTop / firstHalf * idx); // 15 7.5 0
-        const increase = (startTop / lastHalf * (idx - lastHalf - 1)); //0  7.5 15
-        if (idx < half) {
-            // con(decrease)
-            return decrease;
-        } else if ((firstHalf == lastHalf) && (idx == Math.floor(half))) {
-            return 0;
-        } else {
-            // con(increase)
-            return increase;
-        }
-
-    }
-
-
-
-    #stopAnimation(...except) {
-        for (let key in this.#animation) {
-            if (except.some(item => item == key)) {
-                continue;
-            }
-            if (this.#animation[key]?.playState == 'running') {
-                this.#animation[key].pause();
-                // console.log('애니메이션 멈춤')
-            }
-        }
-    }
-
-    #stopSounds() {
-        for (let key in audioObj) {
-            stopSound(audioObj[key]);
-            //setTimeout걸어둔 audio clear
-            clearTimeout(this.#audioTimeout);
-        }
-    }
-
-    #checkRunningAnimation() {
-        const result = [];
-        for (const key in this.#animation) {
-            (this.#animation[key].playState == 'running') && result.push({ name: key, animation: this.#animation[key] });
-        }
-        return result;
     }
 
     #clickAnimation(e) {
@@ -593,7 +534,6 @@ class TaroCard {
                     sparkleDiv.remove();
                 }
             }, soundDelay);
-
 
 
             //back 뒷면카드 요소 추가
@@ -670,8 +610,8 @@ class TaroCard {
     }
 
     /**
-     * 뒤집어진 카드 reset
-     */
+    * 뒤집어진 카드 reset
+    */
     #resetCardState() {
         this.selectedList.forEach((item, idx) => {
             clearTimeout(this.#imgTimeout);
@@ -711,12 +651,81 @@ class TaroCard {
                 this.#field.querySelectorAll('li img.back').forEach(item => {
                     item.remove();
                 });
-                this.#animateshuffle();
+                this.#shuffleAnimation();
             }
         } else {
-            this.#animateshuffle();
+            this.#shuffleAnimation();
         }
     }
+
+    #calculateVw(px) {
+        return ((px) / window.innerWidth * 100);
+    }
+
+    /**
+     * spread, curve시 카드 left position
+     * @param {*} cardList 
+     * @param {*} idx 
+     * @returns {string}  px
+     */
+    #calculateLeftPosition(cardList, idx) {
+        let leftPx = ((this.#fieldWidth - this.#cardWidth) / (cardList.length - 1));
+        return Math.ceil(leftPx * idx) + 'px';
+    }
+
+    /**
+    * spreadCurveAnimation시 카드 top position
+    * @param {*} cardList 
+    * @param {*} idx 
+    * @param {*} startTop 시작top값
+    * @returns {string} 
+    */
+    #calculateTopPosition(cardList, idx, startTop) {
+        let half = cardList.length / 2
+        let firstHalf = Math.ceil(half) - 1;
+        let lastHalf = Math.floor(half) - 1;
+        // con(half)
+        const decrease = startTop - (startTop / firstHalf * idx); // 15 7.5 0
+        const increase = (startTop / lastHalf * (idx - lastHalf - 1)); //0  7.5 15
+        if (idx < half) {
+            // con(decrease)
+            return decrease;
+        } else if ((firstHalf == lastHalf) && (idx == Math.floor(half))) {
+            return 0;
+        } else {
+            // con(increase)
+            return increase;
+        }
+    }
+
+    #stopAnimation(...except) {
+        for (let key in this.#animation) {
+            if (except.some(item => item == key)) {
+                continue;
+            }
+            if (this.#animation[key]?.playState == 'running') {
+                this.#animation[key].pause();
+                // console.log('애니메이션 멈춤')
+            }
+        }
+    }
+
+    #stopSounds() {
+        for (let key in audioObj) {
+            stopSound(audioObj[key]);
+            //setTimeout걸어둔 audio clear
+            clearTimeout(this.#audioTimeout);
+        }
+    }
+
+    #checkRunningAnimation() {
+        const result = [];
+        for (const key in this.#animation) {
+            (this.#animation[key].playState == 'running') && result.push({ name: key, animation: this.#animation[key] });
+        }
+        return result;
+    }
+
 }
 
 
