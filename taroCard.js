@@ -10,6 +10,15 @@ audioObj.positionSound = new Audio('./sounds/shuffleSpread.mp3');
 
 
 //     수정중 *** 검색
+// - 선택완료된 카드 이동.. -> drag 영역 설정
+// - 구조 변경...? (선택된 카드 영역..)   -> carpet 구조는 설정됨.. 근데 카펫은 전체를 까는게 좋을지..?
+// - 원형 구조..... 배열
+// - 하단 높이... 계산 다시하기(top이 가장 큰 위치(맨아래) 기준)
+
+
+//shuffle  후 ->원형 카드 위치 수정필요
+
+
 
 
 /**
@@ -48,7 +57,7 @@ class TaroCard {
     #audioTimeout;
     #imgTimeout;
     #init;
-    #isCurve;
+    #lineState;
     constructor(cardObj, maxCnt) {
         this.#MAX_CARDS_IN_ONE_LINE = 12; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
@@ -70,6 +79,8 @@ class TaroCard {
             // this.#init && this.reset();
             this.#init && this.#measure();
         });
+
+
     }
 
     /**
@@ -77,7 +88,7 @@ class TaroCard {
     */
     init() {
         this.#init = true;
-        this.#isCurve = false;
+        this.#lineState = 'line';
 
         this.#randomList();
         this.#render();
@@ -92,7 +103,16 @@ class TaroCard {
     * 커브 라인정렬 
     */
     spreadCurve() {
-        this.#isCurve = true;
+        this.#lineState = 'curve'
+        this.#randomList();
+        this.#render();
+    }
+
+    /**
+       * 커브 라인정렬 
+       */
+    spreadCircle() {
+        this.#lineState = 'circle';
         this.#randomList();
         this.#render();
     }
@@ -102,6 +122,9 @@ class TaroCard {
     * curve,line 상태값 유지한채 shuffle
     */
     shuffle() {
+        if (this.#lineState == 'line') {
+            this.#lineState = 'shuffleLine';
+        }
         //class삭제
         this.#field.querySelector('ul').classList.remove('clickable');
 
@@ -210,12 +233,26 @@ class TaroCard {
             // this.#field.style.background = `url(/card01.png) no-repeat 50% ${this.#selectedAreaPosition.top}px`;
             // this.#field.style.backgroundSize = `cover`;
 
-            if (this.#isCurve) {
-                this.#spreadCurveAnimation();
-            } else {
-                this.#spread();
-            }
+            this.#lineStateAnimation();
         };
+    }
+
+    #lineStateAnimation() {
+        switch (this.#lineState) {
+            case 'shuffleLine':
+                con('shuffleLine')
+                this.#spreadLineAnimation();
+                break;
+            case 'curve':
+                this.#spreadCurveAnimation();
+                break;
+            case 'circle':
+                this.#spreadCircleAnimation();
+                break;
+            default:
+                this.#spread();
+                break;
+        }
     }
 
     #measure() {
@@ -233,24 +270,27 @@ class TaroCard {
         });
 
         //카드펼쳐지는 영역 position
-        this.#selectedAreaPosition.top = this.#cardHeight * 2 + this.#CARD_ROW_GAP;
+        //unClick 카드 중 가장 하위 요소 위치값
+        const cardlowestPosition = Math.max(...this.#cardList.map(item => {
+            if (!item.dom.classList.contains('unClick')) {
+                return 0;
+            }
+            return item.dom.getBoundingClientRect().bottom;
+        }));
+        const borderTop = parseInt(window.getComputedStyle(document.querySelector('#canvasContainer')).borderWidth);
+        this.#selectedAreaPosition.top = cardlowestPosition + this.#CARD_ROW_GAP - borderTop;
+
         this.#fieldHeight = this.#field.clientHeight -
             (parseInt(window.getComputedStyle(this.#field).paddingTop) +
                 parseInt(window.getComputedStyle(this.#field).paddingBottom));
-        // this.#selectedAreaPosition.bottom = this.#fieldHeight -
-        //     this.#cardHeight;
+        this.#selectedAreaPosition.height = (this.#fieldHeight - this.#selectedAreaPosition.top + this.#CARD_ROW_GAP + borderTop);
 
-        this.#selectedAreaPosition.verticalCenter = this.#selectedAreaPosition.top +
-            ((this.#fieldHeight -
-                this.#selectedAreaPosition.top) / 2);
+        this.#selectedAreaPosition.verticalCenter = this.#selectedAreaPosition.top + this.#selectedAreaPosition.height / 2 - this.#cardHeight / 2;
 
 
-
-        //carpet 요소 추가
-        // const borderTop = parseInt(window.getComputedStyle(document.querySelector('#canvasContainer')).borderWidth);
-        // this.carpet.style.top = this.#selectedAreaPosition.top + parseInt(window.getComputedStyle(this.#field).paddingTop) + this.#CARD_ROW_GAP + borderTop + 'px';
-        // this.carpet.style.width = this.#fieldWidth + 'px';
-        // this.carpet.style.height = (this.#fieldHeight - this.#selectedAreaPosition.top - this.#CARD_ROW_GAP) + 'px'
+        this.carpet.style.top = this.#selectedAreaPosition.top + 'px';
+        this.carpet.style.width = this.#fieldWidth + 'px';
+        this.carpet.style.height = this.#selectedAreaPosition.height + 'px'
 
     }
 
@@ -298,6 +338,8 @@ class TaroCard {
         this.#animation.spread.onfinish = () => {
             // class추가
             this.#field.querySelector('ul').classList.add('clickable');
+
+            this.#measure();
         }
     }
 
@@ -375,11 +417,7 @@ class TaroCard {
 
         //카드 펼치기
         this.#animation.shuffle.onfinish = () => {
-            if (this.#isCurve) {
-                this.#spreadCurveAnimation();
-            } else {
-                this.#spreadLineAnimation();
-            }
+            this.#lineStateAnimation();
         }
     }
 
@@ -435,6 +473,8 @@ class TaroCard {
         this.#animation.shuffleSpread.onfinish = () => {
             //펼쳐진후 클릭가능(class 추가)
             this.#field.querySelector('ul').classList.add('clickable');
+
+            this.#measure();
         }
     }
 
@@ -491,8 +531,59 @@ class TaroCard {
         this.#animation.spread.onfinish = () => {
             //펼쳐진후 클릭가능(class 추가)
             this.#field.querySelector('ul').classList.add('clickable');
+
+            this.#measure();
         }
     }
+
+
+
+    #spreadCircleAnimation() {
+        this.#stopAnimation();
+
+        //spread sound
+        this.#stopSounds();
+        this.#audioTimeout = setTimeout(function () {
+            audioObj.spreadSound.volume = 0.6;
+            playSound(audioObj.spreadSound);
+        }, 300);
+
+
+        const diameter = this.#fieldWidth * 0.35;
+        var theta = [];
+        var frags = 360 / this.#cardCount;
+        for (var i = 0; i <= this.#cardCount; i++) {
+            theta.push((frags / 180) * i * Math.PI);
+        }
+        var circleArray = [];
+        for (var i = 0; i < this.#cardCount; i++) {
+            circleArray.push({
+                posx: Math.round(diameter * (Math.cos(theta[i]))) + 'px',
+                posy: Math.round(diameter * (Math.sin(theta[i]))) + 'px'
+            });
+        }
+        // con(circleArray)
+        const timeForAnimation = 700; //700
+        this.#cardList.forEach((item, idx) => {
+            const delay = timeForAnimation / this.#cardList.length * idx;
+            this.#animation.spread = item.dom.animate([{
+                top: (diameter / 2 + (this.#cardHeight / 2) + parseInt(circleArray[idx].posy)) + 'px',
+                left: ((this.#fieldWidth / 2 - this.#cardWidth / 2) - parseInt(circleArray[idx].posx)) + 'px',
+            }],
+                { duration: timeForAnimation, fill: "forwards", delay });
+        });
+
+        if (!this.#animation.spread) return;
+        this.#animation.spread.onfinish = () => {
+            //펼쳐진후 클릭가능(class 추가)
+            this.#field.querySelector('ul').classList.add('clickable');
+
+            this.#measure();
+        }
+    }
+
+
+
 
     #clickAnimation(e) {
         const target = e.target.parentNode; //li

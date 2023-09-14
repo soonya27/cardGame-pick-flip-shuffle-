@@ -30,6 +30,7 @@
     <div class="btn-wrap" style="display: none;">
         <button onclick="reset()">카드 초기화</button>
         <button onclick="curveLine()">커브라인 나열</button>
+        <button onclick="circleLine()">원형라인 나열</button>
         <button onclick="shuffleCards()">카드 섞기</button>
     </div>
     <script src="./taroCard.js"></script>
@@ -77,6 +78,10 @@
         }
         function shuffleCards() {
             taroCard.shuffle();
+        }
+
+        function circleLine() {
+            taroCard.spreadCircle();
         }
         function curveLine() {
             taroCard.spreadCurve();
