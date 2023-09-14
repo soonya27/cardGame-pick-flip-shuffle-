@@ -195,6 +195,11 @@ class TaroCard {
             });
         });
 
+
+        //카페트 요소
+        this.carpet = document.querySelector('.carpet-wrap');
+
+
         const coverImg = new Image();
         coverImg.src = coverIgmUrl;
         coverImg.onload = () => {
@@ -232,12 +237,21 @@ class TaroCard {
         this.#fieldHeight = this.#field.clientHeight -
             (parseInt(window.getComputedStyle(this.#field).paddingTop) +
                 parseInt(window.getComputedStyle(this.#field).paddingBottom));
-        this.#selectedAreaPosition.bottom = this.#fieldHeight -
-            this.#cardHeight;
+        // this.#selectedAreaPosition.bottom = this.#fieldHeight -
+        //     this.#cardHeight;
 
         this.#selectedAreaPosition.verticalCenter = this.#selectedAreaPosition.top +
             ((this.#fieldHeight -
                 this.#selectedAreaPosition.top) / 2);
+
+
+
+        //carpet 요소 추가
+        // const borderTop = parseInt(window.getComputedStyle(document.querySelector('#canvasContainer')).borderWidth);
+        // this.carpet.style.top = this.#selectedAreaPosition.top + parseInt(window.getComputedStyle(this.#field).paddingTop) + this.#CARD_ROW_GAP + borderTop + 'px';
+        // this.carpet.style.width = this.#fieldWidth + 'px';
+        // this.carpet.style.height = (this.#fieldHeight - this.#selectedAreaPosition.top - this.#CARD_ROW_GAP) + 'px'
+
     }
 
     /**

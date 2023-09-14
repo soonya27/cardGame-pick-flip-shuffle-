@@ -1,9 +1,26 @@
 #canvasContainer {
+    position: relative;
     width: 100%;
     height: calc(100vh - 42px);
-    background-color: #540e80;
     border: 10px solid #3f0960;
+    background-color: #540e80;
     box-sizing: border-box;
+    background-image: url(/img/rug_bg.jpg);
+    background-size: cover;
+    background-position: 50% 50%;
+
+}
+
+#canvasContainer:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #370656;
+    opacity: 0.7;
 }
 
 .info {
@@ -14,6 +31,7 @@
     padding: 20px 30px;
     text-align: right;
     box-sizing: border-box;
+    z-index: 1;
 }
 
 .info strong {
@@ -25,8 +43,9 @@
     position: relative;
     width: 100%;
     height: 100%;
-    padding: 40px 20px;
+    padding: 40px 20px 20px;
     box-sizing: border-box;
+    z-index: 1;
 }
 
 .card-wrap ul {
@@ -67,6 +86,30 @@
     border-radius: 1.3vw;
     overflow: hidden;
 }
+
+.carpet-wrap {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    background: url(/img/rug.jpg);
+    background-size: cover;
+    background-position: 50% 50%;
+    opacity: 0.9;
+}
+
+.carpet-wrap:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #370656;
+    opacity: 0.7;
+}
+
 
 .card-wrap .sparkle-img {
     display: block;
@@ -160,6 +203,7 @@
     width: 70%;
     min-height: 50vh;
     background-color: #ffffff73;
+    z-index: 10;
 }
 
 .pop-start.hide {
