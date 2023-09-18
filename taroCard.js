@@ -220,6 +220,48 @@ class TaroCard {
                 playSound(audioObj.clickSound);
                 this.#clickAnimation(e);
             });
+
+
+            cardLi.onmousedown = function (event) {
+                if (event.target.localName != 'img') {
+                    return;
+                }
+                if (event.target.closest('div').classList.contains('sparkle-img')) {
+                    return;
+                }
+                if (!event.target.closest('ul').classList.contains('finished') ||
+                    !event.target.closest('li').classList.contains('clicked')) {
+                    return;
+                }
+
+                const target = event.target.closest('li');
+                let shiftX = event.clientX - target.getBoundingClientRect().left;
+                let shiftY = event.clientY - target.getBoundingClientRect().top;
+
+
+                moveAt(event.pageX, event.pageY);
+
+                function moveAt(pageX, pageY) {
+                    target.animate([
+                        { left: pageX - shiftX + 'px', top: pageY - shiftY + 'px' }],
+                        { duration: 100, fill: "forwards" });
+                }
+
+                function onMouseMove(event) {
+                    moveAt(event.pageX, event.pageY);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+
+                target.onmouseup = function () {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    target.onmouseup = null;
+                };
+
+            }
+            cardLi.ondragstart = function () {
+                return false;
+            };
         });
 
 
@@ -767,6 +809,7 @@ class TaroCard {
                 this.#animation.click.onfinish = () => {
                     //모두 선택됐으면 click막기
                     if (this.selectedList.length == this.#MAX_SELECET_CNT) {
+                        e.target.closest('ul').classList.add('finished');
                         return;
                     }
                     e.target.closest('ul').classList.add('clickable');

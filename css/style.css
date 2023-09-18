@@ -158,6 +158,22 @@
     width: 100%;
 }
 
+/* finished 클릭후 드래그 이동 */
+.card-wrap ul.finished li.clicked {
+    touch-action: none;
+    user-select: none;
+}
+
+.card-wrap ul.finished li.clicked:active {
+    /* background-color: rgba(168, 218, 220, 1.00); */
+}
+
+.card-wrap ul.finished li.clicked:hover {
+    cursor: pointer;
+}
+
+
+
 
 .btn-wrap button {
     padding: 10px;
