@@ -45,6 +45,7 @@ class TaroCard {
     #field;
     #fieldWidth;
     #fieldHeight;
+    #fieldPaddingTop;
     #cardList;
     #cardListTop;
     #cardListBottom;
@@ -58,9 +59,12 @@ class TaroCard {
     #imgTimeout;
     #init;
     #lineState;
+    #carpet;
+    #CIRCLE_DOUBLE;
     constructor(cardObj, maxCnt) {
         this.#MAX_CARDS_IN_ONE_LINE = 12; //한줄 최대 카드갯수
         this.#CARD_ROW_GAP = 20; // 카드 세로 간격 px
+        this.#CIRCLE_DOUBLE = 0.35;
         if (maxCnt > 5) {
             con('최대 선택가능한 카드는 5개입니다.');
             this.#MAX_SELECET_CNT = 5;
@@ -220,7 +224,7 @@ class TaroCard {
 
 
         //카페트 요소
-        this.carpet = document.querySelector('.carpet-wrap');
+        this.#carpet = document.querySelector('.carpet-wrap');
 
 
         const coverImg = new Image();
@@ -240,7 +244,6 @@ class TaroCard {
     #lineStateAnimation() {
         switch (this.#lineState) {
             case 'shuffleLine':
-                con('shuffleLine')
                 this.#spreadLineAnimation();
                 break;
             case 'curve':
@@ -277,22 +280,63 @@ class TaroCard {
             }
             return item.dom.getBoundingClientRect().bottom;
         }));
-        const borderTop = parseInt(window.getComputedStyle(document.querySelector('#canvasContainer')).borderWidth);
-        this.#selectedAreaPosition.top = cardlowestPosition + this.#CARD_ROW_GAP - borderTop;
+        const borderTop = parseInt(window.getComputedStyle(document.querySelector('#canvasContainer')).borderTopWidth);
+        const borderBottom = parseInt(window.getComputedStyle(document.querySelector('#canvasContainer')).borderBottomWidth);
 
+        this.#selectedAreaPosition.top = cardlowestPosition + this.#CARD_ROW_GAP - borderTop;
         this.#fieldHeight = this.#field.clientHeight -
             (parseInt(window.getComputedStyle(this.#field).paddingTop) +
                 parseInt(window.getComputedStyle(this.#field).paddingBottom));
-        this.#selectedAreaPosition.height = (this.#fieldHeight - this.#selectedAreaPosition.top + this.#CARD_ROW_GAP + borderTop);
+        this.#selectedAreaPosition.height = (this.#fieldHeight - this.#selectedAreaPosition.top + this.#CARD_ROW_GAP + borderTop + borderBottom);
 
         this.#selectedAreaPosition.verticalCenter = this.#selectedAreaPosition.top + this.#selectedAreaPosition.height / 2 - this.#cardHeight / 2;
 
+        this.#fieldPaddingTop = parseInt(window.getComputedStyle(this.#field).paddingTop);
 
-        this.carpet.style.top = this.#selectedAreaPosition.top + 'px';
-        this.carpet.style.width = this.#fieldWidth + 'px';
-        this.carpet.style.height = this.#selectedAreaPosition.height + 'px'
 
+        //카펫 환경 -> 애니메이션 끝나면....
+        // this.#carpet.style.display = 'none';
+        // this.#carpet.style.top = this.#selectedAreaPosition.top + 'px';
+        // this.#carpet.style.width = this.#fieldWidth + 'px';
+        // this.#carpet.style.height = this.#selectedAreaPosition.height + 'px';
+
+
+
+        //carpet 위치,높이 적용 미리..
+        //1.line  -> top : this.#cardHeight * 2 + this.#CARD_ROW_GAP * 2 + this.#fieldPaddingTop   
+        //          height : this.#fieldHeight - (this.#cardHeight * 2 + this.#CARD_ROW_GAP * 2)
+
+        //2.curve  -> top : this.#cardHeight * 2 + this.#cardHeight / 4 + this.#CARD_ROW_GAP * 1.5 * 2 + this.#fieldPaddingTop 
+        //         height : this.#fieldHeight - (this.#cardHeight * 2 + this.#cardHeight / 4 + this.#CARD_ROW_GAP * 1.5 * 2) 
+
+        //3.circle -> top : radius * 2 + this.#cardHeight + this.#fieldPaddingTop + this.#CARD_ROW_GAP
+        //         height : this.#fieldHeight - (radius * 2 + this.#cardHeight + this.#CARD_ROW_GAP)
+
+
+        const radius = this.#fieldWidth * this.#CIRCLE_DOUBLE;
+        const carpetObj = {
+            line: {
+                top: this.#cardHeight * 2 + this.#CARD_ROW_GAP * 2 + this.#fieldPaddingTop,
+                height: this.#fieldHeight - (this.#cardHeight * 2 + this.#CARD_ROW_GAP * 2)
+            },
+            curve: {
+                top: this.#cardHeight * 2 + this.#cardHeight / 4 + this.#CARD_ROW_GAP * 1.5 * 2 + this.#fieldPaddingTop,
+                height: this.#fieldHeight - (this.#cardHeight * 2 + this.#cardHeight / 4 + this.#CARD_ROW_GAP * 1.5 * 2)
+            },
+            circle: {
+                top: radius * 2 + this.#cardHeight + this.#fieldPaddingTop + this.#CARD_ROW_GAP,
+                height: this.#fieldHeight - (radius * 2 + this.#cardHeight + this.#CARD_ROW_GAP)
+            }
+        }
+
+        const carpetPositionObj = carpetObj[this.#lineState] || carpetObj['line'];
+        this.#carpet.style.width = this.#fieldWidth + 'px';
+        for (let key in carpetObj) {
+            this.#carpet.style.top = carpetPositionObj.top + 'px';
+            this.#carpet.style.height = carpetPositionObj.height + 'px';
+        }
     }
+
 
     /**
      * 카드 펼쳐지기 -> ( defaul line spread )
@@ -501,7 +545,6 @@ class TaroCard {
         let topAnimation = [];
 
         this.#cardListTop.forEach((item, idx) => {
-
             topPostion = this.#calculateTopPosition(this.#cardListTop, idx, topLinePosition) + 'px';
             topAnimation.push({ top: topPostion, left: this.#calculateLeftPosition(this.#cardListTop, idx) });
             item.dom.animate(topAnimation,
@@ -543,34 +586,46 @@ class TaroCard {
 
         //spread sound
         this.#stopSounds();
-        this.#audioTimeout = setTimeout(function () {
-            audioObj.spreadSound.volume = 0.6;
-            playSound(audioObj.spreadSound);
-        }, 300);
 
-
-        const diameter = this.#fieldWidth * 0.35;
-        var theta = [];
-        var frags = 360 / this.#cardCount;
-        for (var i = 0; i <= this.#cardCount; i++) {
-            theta.push((frags / 180) * i * Math.PI);
+        const radius = this.#fieldWidth * this.#CIRCLE_DOUBLE;
+        let theta = [];
+        let frags = 360 / this.#cardCount;
+        for (let i = 0; i <= this.#cardCount; i++) {
+            theta.push((frags / 195) * i * Math.PI);
         }
-        var circleArray = [];
-        for (var i = 0; i < this.#cardCount; i++) {
+        let circleArray = [];
+        for (let i = 0; i < this.#cardCount; i++) {
+            // if (i > this.#cardCount / 4 * 3) {
+            //     circleArray.push({
+            //         posx: Math.round(this.#fieldWidth * (this.#CIRCLE_DOUBLE + 0.05) * (Math.cos(theta[i]))) + 'px',
+            //         posy: Math.round(radius * (Math.sin(theta[i]))) + 'px'
+            //     });
+            // } else {
             circleArray.push({
-                posx: Math.round(diameter * (Math.cos(theta[i]))) + 'px',
-                posy: Math.round(diameter * (Math.sin(theta[i]))) + 'px'
+                posx: Math.round(radius * (Math.cos(theta[i]))) + 'px',
+                posy: Math.round(radius * (Math.sin(theta[i]))) + 'px'
             });
+            // }
         }
-        // con(circleArray)
-        const timeForAnimation = 700; //700
+        const timeForAnimation = 700; //900
+
+        let topList = [];
         this.#cardList.forEach((item, idx) => {
+
+            //시작 위치
+            item.dom.animate([{
+                top: (radius / 2 + (this.#cardHeight - this.#cardWidth) + this.#fieldPaddingTop + parseInt(circleArray[0].posy)) + 'px',
+                left: ((this.#fieldWidth / 2 - this.#cardWidth / 2) - parseInt(circleArray[0].posx)) + 'px',
+                transform: 'translateX(0)'
+            },],
+                { duration: timeForAnimation, fill: "forwards" });
+
+            const topPostion = (radius / 2 + (this.#cardHeight - this.#cardWidth) + this.#fieldPaddingTop + parseInt(circleArray[idx].posy)) + 'px';
+            const leftPositon = ((this.#fieldWidth / 2 - this.#cardWidth / 2) - parseInt(circleArray[idx].posx)) + 'px';
+            topList.push({ top: topPostion, left: leftPositon });
             const delay = timeForAnimation / this.#cardList.length * idx;
-            this.#animation.spread = item.dom.animate([{
-                top: (diameter / 2 + (this.#cardHeight / 2) + parseInt(circleArray[idx].posy)) + 'px',
-                left: ((this.#fieldWidth / 2 - this.#cardWidth / 2) - parseInt(circleArray[idx].posx)) + 'px',
-            }],
-                { duration: timeForAnimation, fill: "forwards", delay });
+            this.#animation.spread = item.dom.animate(topList,
+                { duration: timeForAnimation, fill: "forwards", delay: delay + timeForAnimation });
         });
 
         if (!this.#animation.spread) return;
@@ -581,8 +636,6 @@ class TaroCard {
             this.#measure();
         }
     }
-
-
 
 
     #clickAnimation(e) {
@@ -838,7 +891,9 @@ class TaroCard {
     #checkRunningAnimation() {
         const result = [];
         for (const key in this.#animation) {
-            (this.#animation[key].playState == 'running') && result.push({ name: key, animation: this.#animation[key] });
+            if (this.#animation[key].playState == 'finished') {
+                result.push({ name: key, animation: this.#animation[key] });
+            }
         }
         return result;
     }
