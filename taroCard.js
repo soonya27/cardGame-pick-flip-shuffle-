@@ -131,6 +131,7 @@ class TaroCard {
         }
         //class삭제
         this.#field.querySelector('ul').classList.remove('clickable');
+        this.#field.querySelector('ul').classList.remove('finished');
 
         //클릭여부  -> 클릭된게 있고 클릭 애니메이션 진행중일때
         if (this.selectedList.length != 0) {
@@ -221,52 +222,263 @@ class TaroCard {
                 this.#clickAnimation(e);
             });
 
+            // const isTouchScreen =
+            //     typeof window !== 'undefined' && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+            let initX, initY, firstX, firstY;
+            // if (isTouchScreen) {
 
-            cardLi.onmousedown = function (event) {
-                if (event.target.localName != 'img') {
+            cardLi.addEventListener('mousedown', function (e) {
+                //위치 벗어나면 return...(돋보기랑 같은 원리로...)
+                if (e.target.localName != 'img') {
                     return;
                 }
-                if (event.target.closest('div').classList.contains('sparkle-img')) {
+                if (e.target.closest('div').classList.contains('sparkle-img')) {
                     return;
                 }
-                if (!event.target.closest('ul').classList.contains('finished') ||
-                    !event.target.closest('li').classList.contains('clicked')) {
+                if (!e.target.closest('ul').classList.contains('finished') ||
+                    !e.target.closest('li').classList.contains('clicked')) {
                     return;
                 }
+                e.preventDefault();
+                initX = this.offsetLeft;
+                initY = this.offsetTop;
+                firstX = e.pageX;
+                firstY = e.pageY;
+                e.target.closest('li').animate([
+                    {
+                        left: initX + e.pageX - firstX + 'px',
+                        top: initY + e.pageY - firstY + 'px'
+                    }],
+                    { duration: 100, fill: "forwards" });
+                this.addEventListener('mousemove', dragIt, false);
 
-                const target = event.target.closest('li');
-                let shiftX = event.clientX - target.getBoundingClientRect().left;
-                let shiftY = event.clientY - target.getBoundingClientRect().top;
+                window.addEventListener('mouseup', function () {
+                    cardLi.removeEventListener('mousemove', dragIt, false);
+                }, false);
+
+            }, false);
 
 
-                moveAt(event.pageX, event.pageY);
-
-                function moveAt(pageX, pageY) {
-                    target.animate([
-                        { left: pageX - shiftX + 'px', top: pageY - shiftY + 'px' }],
-                        { duration: 100, fill: "forwards" });
+            cardLi.addEventListener('touchstart', function (e) {
+                if (e.target.localName != 'img') {
+                    return;
                 }
-
-                function onMouseMove(event) {
-                    moveAt(event.pageX, event.pageY);
+                if (e.target.closest('div').classList.contains('sparkle-img')) {
+                    return;
                 }
+                if (!e.target.closest('ul').classList.contains('finished') ||
+                    !e.target.closest('li').classList.contains('clicked')) {
+                    return;
+                }
+                e.preventDefault();
+                initX = this.offsetLeft;
+                initY = this.offsetTop;
+                var touch = e.touches;
+                firstX = touch[0].pageX;
+                firstY = touch[0].pageY;
 
-                document.addEventListener('mousemove', onMouseMove);
+                this.addEventListener('touchmove', swipeIt, { passive: false });
 
-                target.onmouseup = function () {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    target.onmouseup = null;
-                };
+                window.addEventListener('touchend', function (e) {
+                    e.preventDefault();
+                    cardLi.removeEventListener('touchmove', swipeIt);
+                }, { once: true });
 
+            }, false);
+
+            // }
+
+
+            function dragIt(e) {
+                // con('drag')
+                this.animate([
+                    {
+                        left: initX + e.pageX - firstX + 'px',
+                        top: initY + e.pageY - firstY + 'px'
+                    }],
+                    { duration: 100, fill: "forwards" });
+                // this.animate([
+                //     {
+                //         zIndex: 9999
+                //     }],
+                //     { duration: 100, fill: "backwards" });
             }
-            cardLi.ondragstart = function () {
-                return false;
-            };
+
+            function swipeIt(e) {
+                // con('swipe')
+                var contact = e.touches;
+                this.animate([
+                    {
+                        left: initX + contact[0].pageX - firstX + 'px',
+                        top: initY + contact[0].pageY - firstY + 'px'
+                    }],
+                    { duration: 100, fill: "forwards" });
+                // this.animate([
+                //     {
+                //         zIndex: 9999
+                //     }],
+                //     { duration: 100, fill: "backwards" });
+            }
+            //클릭한 z-index높게.. >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // cardLi.onmousedown = function (event) {
+            //     if (event.target.localName != 'img') {
+            //         return;
+            //     }
+            //     if (event.target.closest('div').classList.contains('sparkle-img')) {
+            //         return;
+            //     }
+            //     if (!event.target.closest('ul').classList.contains('finished') ||
+            //         !event.target.closest('li').classList.contains('clicked')) {
+            //         return;
+            //     }
+
+            //     const target = event.target.closest('li');
+            //     con(target)
+            //     let shiftX = event.clientX - target.getBoundingClientRect().left;
+            //     let shiftY = event.clientY - target.getBoundingClientRect().top;
+
+
+            //     moveAt(event.pageX, event.pageY);
+
+            //     function moveAt(pageX, pageY) {
+            //         target.animate([
+            //             { left: pageX - shiftX + 'px', top: pageY - shiftY + 'px' }],
+            //             { duration: 100, fill: "forwards" });
+            //     }
+
+            //     function onMouseMove(event) {
+            //         moveAt(event.pageX, event.pageY);
+            //     }
+
+            //     document.addEventListener('mousemove', onMouseMove);
+
+            //     target.onmouseup = function () {
+            //         document.removeEventListener('mousemove', onMouseMove);
+            //         target.onmouseup = null;
+            //     };
+
+            // }
+            // cardLi.ondragstart = function () {
+            //     return false;
+            // };
         });
 
 
         //카페트 요소
-        this.#carpet = document.querySelector('.carpet-wrap');
+        this.#carpet = document.createElement('div');
+        this.#carpet.setAttribute('class', 'carpet-wrap');
+        this.#field.appendChild(this.#carpet);
+
+        // this.#carpet.addEventListener("touchstart", dragStart, false);
+        // this.#carpet.addEventListener("touchend", dragEnd, false);
+        // this.#carpet.addEventListener("touchmove", drag, false);
+
+        // this.#carpet.addEventListener("mousedown", dragStart, false);
+        // this.#carpet.addEventListener("mouseup", dragEnd, false);
+        // this.#carpet.addEventListener("mousemove", drag, false);
+
+
+        // var active = false;
+        // var currentX;
+        // var currentY;
+        // var initialX;
+        // var initialY;
+        // var xOffset = 0;
+        // var yOffset = 0;
+
+        // function dragStart(event) {
+        //     con(event)
+        //     if (event.target.localName != 'img') {
+        //         return;
+        //     }
+        //     if (event.target.closest('div').classList.contains('sparkle-img')) {
+        //         return;
+        //     }
+        //     if (!event.target.closest('ul').classList.contains('finished') ||
+        //         !event.target.closest('li').classList.contains('clicked')) {
+        //         return;
+        //     }
+        //     con(event)
+        //     if (event.type === "touchstart") {
+        //         initialX = event.touches[0].clientX - xOffset;
+        //         initialY = event.touches[0].clientY - yOffset;
+        //     } else {
+        //         initialX = event.clientX - xOffset;
+        //         initialY = event.clientY - yOffset;
+        //     }
+
+
+        //     // if (e.target === dragItem) {
+        //     active = true;
+        //     // }
+        // }
+
+        // function dragEnd(event) {
+        //     initialX = currentX;
+        //     initialY = currentY;
+
+        //     active = false;
+        // }
+
+        // function drag(event) {
+        //     if (active) {
+
+        //         event.preventDefault();
+
+        //         if (event.type === "touchmove") {
+        //             currentX = event.touches[0].clientX - initialX;
+        //             currentY = event.touches[0].clientY - initialY;
+        //         } else {
+        //             currentX = event.clientX - initialX;
+        //             currentY = event.clientY - initialY;
+        //         }
+
+        //         xOffset = currentX;
+        //         yOffset = currentY;
+
+        //         setTranslate(currentX, currentY, event.target);
+        //     }
+        // }
+
+        // function setTranslate(xPos, yPos, el) {
+        //     // con(el)
+        //     // el.animate([
+        //     //     { transform: "translate3d(" + xPos + "px, " + yPos + "px, 0)" }],
+        //     //     { duration: 100, fill: "forwards" });
+        //     // el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+        // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         const coverImg = new Image();

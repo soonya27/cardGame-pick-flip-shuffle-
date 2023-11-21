@@ -164,11 +164,9 @@
     user-select: none;
 }
 
-.card-wrap ul.finished li.clicked:active {
-    /* background-color: rgba(168, 218, 220, 1.00); */
-}
 
 .card-wrap ul.finished li.clicked:hover {
+    border: 3px solid #fff;
     cursor: pointer;
 }
 
