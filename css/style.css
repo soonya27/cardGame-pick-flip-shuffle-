@@ -5,7 +5,7 @@
     border: 10px solid #3f0960;
     background-color: #540e80;
     box-sizing: border-box;
-    background-image: url(/img/rug_bg.jpg);
+    background-image: url(../img/rug_bg.jpg);
     background-size: cover;
     background-position: 50% 50%;
 
@@ -92,7 +92,6 @@
     left: 50%;
     top: 0;
     transform: translateX(-50%);
-    background: url(/img/rug.jpg);
     background-size: cover;
     background-position: 50% 50%;
     opacity: 0.9;
