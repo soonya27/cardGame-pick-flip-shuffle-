@@ -22,6 +22,14 @@
 
         <!-- pop -->
         <div class="pop-start">
+            <label for="">선택 가능한 카드</label>
+            <select name="" id="numsOfSelect">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
             <button class="btn-play" id="btnPlay">PLAY</button>
         </div>
         <!-- <div class="carpet-wrap">
@@ -63,11 +71,12 @@
         { id: 24, imgUrl: 'https://picsum.photos/id/124/120/186', title: 'taro24' },
         ];
 
-        const taroCard = new TaroCard(cardDataList, 5);
-
+        let taroCard = '';
         //sound.play -> 시작필요
         document.querySelector('#btnPlay').addEventListener('click', (e) => {
             e.target.parentNode.classList.add('hide');
+            const maxNums = e.target.parentNode.querySelector('#numsOfSelect').value;
+            taroCard = new TaroCard(cardDataList, maxNums);
             taroCard.init();
             document.querySelector('#maxNums').innerHTML = taroCard.maxSelectCount;
             document.querySelector('.btn-wrap').style.display = 'block';

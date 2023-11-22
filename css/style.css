@@ -43,7 +43,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    padding: 40px 20px 20px;
+    padding: 48px 20px 20px;
     box-sizing: border-box;
     z-index: 1;
 }
@@ -213,10 +213,28 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     width: 70%;
     min-height: 50vh;
     background-color: #ffffff73;
     z-index: 10;
+}
+
+.pop-start label {
+    font-weight: bold;
+    margin: 0 0 2vw 0;
+    color: #ffffff;
+    font-size: 4vw;
+}
+
+#numsOfSelect {
+    width: 11.8vw;
+    height: 10vw;
+    border: 1px solid #a3a3a3;
+    border-radius: 1vw;
+    font-size: 3.8vw;
+    text-align: center;
+    outline: none;
 }
 
 .pop-start.hide {
@@ -225,6 +243,7 @@
 
 .pop-start .btn-play {
     padding: 4vw 6vw;
+    margin: 5vw 0;
     font-weight: 600;
     font-size: 6vw;
     background: #fff;
