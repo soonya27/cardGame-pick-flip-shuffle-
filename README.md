@@ -1,16 +1,47 @@
-# cardGame-pick-flip-shuffle- (vanilla Js)
+# CardGame-Shuffle (카드 게임)
 
-### [githubpage](https://soonya27.github.io/cardGame-pick-flip-shuffle-/)
+## [website link](https://soonya27.github.io/cardGame-pick-flip-shuffle-/)
 
 
-### 주요기능
+###
+
+(이 프로젝트는 Card를 섞고, 뽑고, 나열하는 기능을 구현한 javascript 모바일 게임입니다.
+
+vanilla Js와 class를 이용하여 객체 지향적인 코드를 작성했습니다.)
+
+
+## 🌟Features (주요 기능)
+
 - 카드 초기화
-- 카드 나열 (일자정렬, 라인정렬, 원정렬)
-- 카드 셔플(data 섞기)
-- 카드 나열 셔플 플립 애니메이션
+- 카드 나열 (일자정렬, 라인정렬, 원형 정렬)
+- 카드 셔플(기존 나열 유지) - data shuffle
+- 카드 선택 갯수 지정가능
+- 선택 후 flip 애니메이션, 선택 완료후 카드 이동 가능
 - 효과음 추가
 
-### code
+## 🌟Tech Stack (기술 스택)
+
+- **Frontend:**
+  - Javascript
+
+- **Others:**
+  - Git (Version control)
+  - Prettier (Code formatting and static analysis)
+
+- **Deployment:**
+  - githubpage
+
+## 🌟Feedback
+I'm always looking to improve! If you have any feedback, suggestions, or bug reports, feel free to open an issue or reach out to me directly.
+Thank you for visiting my portfolio website!
+
+( 항상 개선을 위한 피드백, 제안 또는 버그 신고를 환영합니다! 언제든지 문제를 제기하거나 저에게 직접 문의해 주세요.
+ 제 홈페이지를 방문해 주셔서 감사합니다!)
+
+
+
+## 🌟Code block
+
 ```javascript
 'use strict';
 let con = console.log;
